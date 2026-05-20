@@ -5,11 +5,14 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { StatusBar } from 'expo-status-bar';
 
 export default function App() {
-  const loadMockDataIfEmpty = usePetStore(state => state.loadMockDataIfEmpty);
+  const hasHydrated = usePetStore((state) => state.hasHydrated);
+  const loadMockDataIfEmpty = usePetStore((state) => state.loadMockDataIfEmpty);
 
   useEffect(() => {
-    loadMockDataIfEmpty();
-  }, []);
+    if (hasHydrated) {
+      loadMockDataIfEmpty();
+    }
+  }, [hasHydrated, loadMockDataIfEmpty]);
 
   return (
     <SafeAreaProvider>

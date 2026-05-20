@@ -80,7 +80,14 @@ export const Button: React.FC<ButtonProps> = ({
       {...props}
     >
       {icon}
-      <Text style={[styles.text, { color: getTextColor() }, textStyle]}>
+      <Text
+        style={[
+          styles.text,
+          icon ? styles.textWithIcon : null,
+          { color: getTextColor() },
+          textStyle,
+        ]}
+      >
         {title}
       </Text>
     </AnimatedPressable>
@@ -100,6 +107,8 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     textAlign: 'center',
-    marginLeft: styling.spacing[8], // spacing if icon is present
+  },
+  textWithIcon: {
+    marginLeft: styling.spacing[8],
   },
 });

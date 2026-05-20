@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable, Modal } from 'react-native';
+import { View, StyleSheet, ScrollView, Pressable, Modal, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -17,39 +17,54 @@ type Props = NativeStackScreenProps<RootStackParamList, 'PetProfile'>;
 
 export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
   const { petId } = route.params;
-  const pet = usePetStore(state => state.pets.find(p => p.id === petId));
-  const addFoodLog = usePetStore(state => state.addFoodLog);
-  const addWaterLog = usePetStore(state => state.addWaterLog);
+  const pet = usePetStore((state) => state.pets.find((p) => p.id === petId));
+  const addFoodLog = usePetStore((state) => state.addFoodLog);
+  const addWaterLog = usePetStore((state) => state.addWaterLog);
+  const deleteHealthEvent = usePetStore((state) => state.deleteHealthEvent);
 
   const [foodModalVisible, setFoodModalVisible] = useState(false);
   const [foodAmount, setFoodAmount] = useState('');
 
-  if (!pet) return null;
-
   React.useLayoutEffect(() => {
+    if (!pet) return;
     navigation.setOptions({
+      title: pet.name,
       headerRight: () => (
         <Pressable onPress={() => navigation.navigate('AddEditPet', { petId })}>
           <Typography style={{ color: colors.accent[500], fontWeight: '600' }}>Edit</Typography>
         </Pressable>
       ),
     });
-  }, [navigation, petId]);
+  }, [navigation, petId, pet]);
 
-  // Derived Stats
+  if (!pet) {
+    return (
+      <View style={styles.missingContainer}>
+        <Typography variant="caption">Pet not found.</Typography>
+      </View>
+    );
+  }
+
   const today = new Date().toISOString().split('T')[0];
-  const todaysFood = pet.foodLogs.filter(log => log.date.startsWith(today)).reduce((sum, log) => sum + log.amountGrams, 0);
-  const targetFood = 300; // Mock target
+  const todaysFood = pet.foodLogs
+    .filter((log) => log.date.startsWith(today))
+    .reduce((sum, log) => sum + log.amountGrams, 0);
+  const targetFood = 300;
   const foodProgress = Math.min(todaysFood / targetFood, 1);
 
-  const todaysWater = pet.waterLogs.filter(log => log.date.startsWith(today)).reduce((sum, log) => sum + log.servings, 0);
+  const todaysWater = pet.waterLogs
+    .filter((log) => log.date.startsWith(today))
+    .reduce((sum, log) => sum + log.servings, 0);
 
-  const lastFed = pet.foodLogs.length > 0
-    ? format(parseISO(pet.foodLogs[pet.foodLogs.length - 1].date), 'h:mm a')
-    : 'Never';
+  const lastFed =
+    pet.foodLogs.length > 0
+      ? format(parseISO(pet.foodLogs[pet.foodLogs.length - 1].date), 'h:mm a')
+      : 'Never';
 
-  const upcomingEvents = pet.healthEvents.filter(e => isAfter(parseISO(e.date), new Date())).sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
-  const nextVaccine = upcomingEvents.find(e => e.type === 'vaccine');
+  const upcomingEvents = pet.healthEvents
+    .filter((e) => isAfter(parseISO(e.date), new Date()))
+    .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+  const nextVaccine = upcomingEvents.find((e) => e.type === 'vaccine');
 
   const handleAddFood = () => {
     const amount = parseInt(foodAmount, 10);
@@ -64,16 +79,27 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
     addWaterLog(petId, { date: new Date().toISOString(), servings: 1 });
   };
 
+  const handleLongPressEvent = (eventId: string, title: string) => {
+    Alert.alert('Delete Event', `Remove "${title}"?`, [
+      { text: 'Cancel', style: 'cancel' },
+      {
+        text: 'Delete',
+        style: 'destructive',
+        onPress: () => deleteHealthEvent(petId, eventId),
+      },
+    ]);
+  };
+
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-      {/* Header Profile */}
       <View style={styles.header}>
         <Avatar uri={pet.avatarUri} size={96} style={styles.largeAvatar} />
         <Typography variant="heading" style={styles.petName}>{pet.name}</Typography>
-        <Typography variant="caption" style={styles.petSubInfo}>{pet.breed}, {pet.weightKg} kg</Typography>
+        <Typography variant="caption" style={styles.petSubInfo}>
+          {pet.breed}, {pet.weightKg} kg
+        </Typography>
       </View>
 
-      {/* Quick Stats */}
       <View style={styles.statsRow}>
         <Card style={styles.statCard}>
           <MaterialCommunityIcons name="scale-bathroom" size={24} color={colors.primary[500]} />
@@ -87,12 +113,13 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         </Card>
         <Card style={styles.statCard}>
           <Ionicons name="medical-outline" size={24} color={colors.success} />
-          <Typography style={styles.statValue}>{nextVaccine ? format(parseISO(nextVaccine.date), 'MMM d') : 'None'}</Typography>
+          <Typography style={styles.statValue}>
+            {nextVaccine ? format(parseISO(nextVaccine.date), 'MMM d') : 'None'}
+          </Typography>
           <Typography variant="caption">Next Vac</Typography>
         </Card>
       </View>
 
-      {/* Nutrition */}
       <Card style={styles.sectionCard}>
         <Typography variant="heading" style={styles.sectionTitle}>Today's Nutrition</Typography>
 
@@ -125,7 +152,6 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         </View>
       </Card>
 
-      {/* Health Calendar */}
       <Card style={styles.sectionCard}>
         <View style={styles.sectionHeader}>
           <Typography variant="heading" style={styles.sectionTitle}>Health Calendar</Typography>
@@ -135,12 +161,28 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         </View>
 
         {pet.healthEvents.length === 0 ? (
-          <Typography variant="caption" style={{ textAlign: 'center', marginVertical: 16 }}>No health events logged yet.</Typography>
+          <Typography variant="caption" style={{ textAlign: 'center', marginVertical: 16 }}>
+            No health events logged yet.
+          </Typography>
         ) : (
-          pet.healthEvents.slice(0, 3).map((event) => ( // Show only recent 3 for MVP simplicity
-            <Pressable key={event.id} style={styles.eventItem} onPress={() => navigation.navigate('AddEditHealthEvent', { petId, eventId: event.id })}>
-              <View style={[styles.eventIcon, { backgroundColor: event.type === 'vaccine' ? colors.primary[100] : colors.neutral[100] }]}>
-                <Ionicons name={event.type === 'vaccine' ? 'medical' : 'calendar'} size={20} color={event.type === 'vaccine' ? colors.primary[700] : colors.neutral[700]} />
+          pet.healthEvents.slice(0, 5).map((event) => (
+            <Pressable
+              key={event.id}
+              style={styles.eventItem}
+              onPress={() => navigation.navigate('AddEditHealthEvent', { petId, eventId: event.id })}
+              onLongPress={() => handleLongPressEvent(event.id, event.title)}
+            >
+              <View
+                style={[
+                  styles.eventIcon,
+                  { backgroundColor: event.type === 'vaccine' ? colors.primary[100] : colors.neutral[100] },
+                ]}
+              >
+                <Ionicons
+                  name={event.type === 'vaccine' ? 'medical' : 'calendar'}
+                  size={20}
+                  color={event.type === 'vaccine' ? colors.primary[700] : colors.neutral[700]}
+                />
               </View>
               <View style={styles.eventDetails}>
                 <Typography style={{ fontWeight: '600' }}>{event.title}</Typography>
@@ -154,8 +196,7 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
 
       <View style={{ height: 40 }} />
 
-      {/* Food Modal */}
-      <Modal visible={foodModalVisible} transparent animationType="fade">
+      <Modal visible={foodModalVisible} transparent animationType="fade" onRequestClose={() => setFoodModalVisible(false)}>
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Typography variant="heading" style={{ marginBottom: 16 }}>Log Food</Typography>
@@ -174,30 +215,17 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
           </View>
         </View>
       </Modal>
-
     </ScrollView>
   );
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  header: {
-    alignItems: 'center',
-    padding: styling.spacing[24],
-  },
-  largeAvatar: {
-    marginBottom: styling.spacing[16],
-  },
-  petName: {
-    fontSize: 32,
-    marginBottom: styling.spacing[4],
-  },
-  petSubInfo: {
-    fontSize: 16,
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  missingContainer: { flex: 1, alignItems: 'center', justifyContent: 'center' },
+  header: { alignItems: 'center', padding: styling.spacing[24] },
+  largeAvatar: { marginBottom: styling.spacing[16] },
+  petName: { fontSize: 32, marginBottom: styling.spacing[4] },
+  petSubInfo: { fontSize: 16 },
   statsRow: {
     flexDirection: 'row',
     paddingHorizontal: styling.spacing[16],
@@ -211,52 +239,22 @@ const styles = StyleSheet.create({
     padding: styling.spacing[12],
     marginBottom: 0,
   },
-  statValue: {
-    fontWeight: 'bold',
-    marginTop: 8,
-    marginBottom: 2,
-  },
-  sectionCard: {
-    marginHorizontal: styling.spacing[16],
-    marginBottom: styling.spacing[16],
-  },
+  statValue: { fontWeight: 'bold', marginTop: 8, marginBottom: 2 },
+  sectionCard: { marginHorizontal: styling.spacing[16], marginBottom: styling.spacing[16] },
   sectionHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
     marginBottom: styling.spacing[16],
   },
-  sectionTitle: {
-    fontSize: 18,
-    marginBottom: styling.spacing[16],
-  },
-  nutritionRow: {
-    marginBottom: styling.spacing[16],
-  },
-  nutritionInfo: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginBottom: 8,
-  },
-  nutritionLabel: {
-    fontWeight: '600',
-  },
-  progressBar: {
-    height: 8,
-  },
-  waterDrops: {
-    flexDirection: 'row',
-    alignItems: 'center',
-  },
-  actionRow: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: styling.spacing[8],
-  },
-  actionBtn: {
-    flex: 1,
-    paddingVertical: 12,
-  },
+  sectionTitle: { fontSize: 18, marginBottom: styling.spacing[16] },
+  nutritionRow: { marginBottom: styling.spacing[16] },
+  nutritionInfo: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 8 },
+  nutritionLabel: { fontWeight: '600' },
+  progressBar: { height: 8 },
+  waterDrops: { flexDirection: 'row', alignItems: 'center' },
+  actionRow: { flexDirection: 'row', justifyContent: 'space-between', marginTop: styling.spacing[8] },
+  actionBtn: { flex: 1, paddingVertical: 12 },
   eventItem: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -272,9 +270,7 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     marginRight: 12,
   },
-  eventDetails: {
-    flex: 1,
-  },
+  eventDetails: { flex: 1 },
   modalOverlay: {
     flex: 1,
     backgroundColor: 'rgba(0,0,0,0.5)',
@@ -285,5 +281,5 @@ const styles = StyleSheet.create({
     backgroundColor: colors.neutral.white,
     padding: 24,
     borderRadius: styling.borderRadius,
-  }
+  },
 });

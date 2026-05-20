@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Alert } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import * as ImagePicker from 'expo-image-picker';
@@ -14,37 +14,86 @@ import { Pet } from '../types/PetCare';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddEditPet'>;
 
+const isValidIsoDate = (value: string) => {
+  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) return false;
+  const d = new Date(value);
+  return !isNaN(d.getTime());
+};
+
 export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
   const { petId } = route.params;
   const isEditing = !!petId;
-  const pets = usePetStore(state => state.pets);
-  const addPet = usePetStore(state => state.addPet);
-  const updatePet = usePetStore(state => state.updatePet);
-  const deletePet = usePetStore(state => state.deletePet);
+  const pets = usePetStore((state) => state.pets);
+  const addPet = usePetStore((state) => state.addPet);
+  const updatePet = usePetStore((state) => state.updatePet);
+  const deletePet = usePetStore((state) => state.deletePet);
 
-  const existingPet = isEditing ? pets.find(p => p.id === petId) : null;
+  const existingPet = isEditing ? pets.find((p) => p.id === petId) : null;
 
   const [name, setName] = useState(existingPet?.name || '');
   const [type, setType] = useState<Pet['type']>(existingPet?.type || 'dog');
+  const [gender, setGender] = useState<Pet['gender']>(existingPet?.gender || 'male');
   const [breed, setBreed] = useState(existingPet?.breed || '');
-  const [weightStr, setWeightStr] = useState(existingPet?.weightKg.toString() || '');
+  const [weightStr, setWeightStr] = useState(existingPet?.weightKg?.toString() || '');
+  const [dobStr, setDobStr] = useState(
+    existingPet?.dateOfBirth ? existingPet.dateOfBirth.split('T')[0] : ''
+  );
   const [avatarUri, setAvatarUri] = useState(existingPet?.avatarUri || '');
+
+  const handleSave = () => {
+    if (!name.trim()) return;
+
+    if (dobStr && !isValidIsoDate(dobStr)) {
+      Alert.alert('Invalid Date', 'Date of birth must be YYYY-MM-DD.');
+      return;
+    }
+
+    const petData = {
+      name: name.trim(),
+      type,
+      breed: breed.trim(),
+      weightKg: parseFloat(weightStr) || 0,
+      gender,
+      dateOfBirth: dobStr
+        ? new Date(dobStr).toISOString()
+        : existingPet?.dateOfBirth || new Date().toISOString(),
+      avatarUri: avatarUri || undefined,
+    };
+
+    if (isEditing && petId) {
+      updatePet(petId, petData);
+    } else {
+      addPet(petData);
+    }
+    navigation.goBack();
+  };
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
       headerRight: () => (
-        <Pressable onPress={handleSave} disabled={!name}>
-          <Typography style={{ color: name ? colors.accent[500] : colors.neutral[300], fontWeight: 'bold' }}>
+        <Pressable onPress={handleSave} disabled={!name.trim()}>
+          <Typography
+            style={{
+              color: name.trim() ? colors.accent[500] : colors.neutral[300],
+              fontWeight: 'bold',
+            }}
+          >
             Save
           </Typography>
         </Pressable>
       ),
     });
-  }, [navigation, name, type, breed, weightStr, avatarUri]);
+  }, [navigation, name, type, gender, breed, weightStr, dobStr, avatarUri]);
 
   const handlePickImage = async () => {
+    const permission = await ImagePicker.requestMediaLibraryPermissionsAsync();
+    if (!permission.granted) {
+      Alert.alert('Permission needed', 'Please allow photo library access.');
+      return;
+    }
+
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: ['images'],
       allowsEditing: true,
       aspect: [1, 1],
       quality: 0.8,
@@ -52,28 +101,6 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
 
     if (!result.canceled && result.assets[0]) {
       setAvatarUri(result.assets[0].uri);
-    }
-  };
-
-  const handleSave = () => {
-    if (!name.trim()) return;
-
-    const petData = {
-      name,
-      type,
-      breed,
-      weightKg: parseFloat(weightStr) || 0,
-      gender: 'male' as const, // Simplified for MVP
-      dateOfBirth: new Date().toISOString(), // Simplified for MVP
-      avatarUri,
-    };
-
-    if (isEditing && petId) {
-      updatePet(petId, petData);
-      navigation.goBack();
-    } else {
-      addPet(petData);
-      navigation.goBack();
     }
   };
 
@@ -85,14 +112,14 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
         style: 'destructive',
         onPress: () => {
           if (petId) deletePet(petId);
-          navigation.navigate('PetList');
-        }
-      }
+          navigation.popToTop();
+        },
+      },
     ]);
   };
 
   return (
-    <ScrollView style={styles.container} contentContainerStyle={styles.content}>
+    <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.avatarSection}>
         <Pressable onPress={handlePickImage} style={styles.avatarPressable}>
           <Avatar uri={avatarUri} size={120} />
@@ -113,14 +140,39 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
 
         <Typography variant="caption" style={styles.label}>Pet Type</Typography>
         <View style={styles.typeSelector}>
-          {(['dog', 'cat', 'other'] as const).map(t => (
+          {(['dog', 'cat', 'other'] as const).map((t) => (
             <Pressable
               key={t}
               onPress={() => setType(t)}
               style={[styles.typeBtn, type === t && styles.typeBtnActive]}
             >
-              <Typography style={{ color: type === t ? colors.primary[700] : colors.neutral[700], textTransform: 'capitalize' }}>
+              <Typography
+                style={{
+                  color: type === t ? colors.primary[700] : colors.neutral[700],
+                  textTransform: 'capitalize',
+                }}
+              >
                 {t}
+              </Typography>
+            </Pressable>
+          ))}
+        </View>
+
+        <Typography variant="caption" style={styles.label}>Gender</Typography>
+        <View style={styles.typeSelector}>
+          {(['male', 'female'] as const).map((g) => (
+            <Pressable
+              key={g}
+              onPress={() => setGender(g)}
+              style={[styles.typeBtn, gender === g && styles.typeBtnActive]}
+            >
+              <Typography
+                style={{
+                  color: gender === g ? colors.primary[700] : colors.neutral[700],
+                  textTransform: 'capitalize',
+                }}
+              >
+                {g}
               </Typography>
             </Pressable>
           ))}
@@ -140,6 +192,15 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
           placeholder="e.g., 12.5"
           keyboardType="numeric"
         />
+
+        <TextInput
+          label="Date of Birth (YYYY-MM-DD)"
+          value={dobStr}
+          onChangeText={setDobStr}
+          placeholder="e.g., 2021-05-10"
+          autoCapitalize="none"
+          autoCorrect={false}
+        />
       </View>
 
       {isEditing && (
@@ -155,20 +216,10 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
 };
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    backgroundColor: colors.background,
-  },
-  content: {
-    padding: styling.spacing[16],
-  },
-  avatarSection: {
-    alignItems: 'center',
-    marginVertical: styling.spacing[24],
-  },
-  avatarPressable: {
-    position: 'relative',
-  },
+  container: { flex: 1, backgroundColor: colors.background },
+  content: { padding: styling.spacing[16] },
+  avatarSection: { alignItems: 'center', marginVertical: styling.spacing[24] },
+  avatarPressable: { position: 'relative' },
   cameraIconContainer: {
     position: 'absolute',
     bottom: 0,
@@ -182,17 +233,9 @@ const styles = StyleSheet.create({
     borderWidth: 3,
     borderColor: colors.background,
   },
-  form: {
-    marginBottom: styling.spacing[32],
-  },
-  label: {
-    marginBottom: 8,
-    fontWeight: '500',
-  },
-  typeSelector: {
-    flexDirection: 'row',
-    marginBottom: styling.spacing[16],
-  },
+  form: { marginBottom: styling.spacing[32] },
+  label: { marginBottom: 8, fontWeight: '500' },
+  typeSelector: { flexDirection: 'row', marginBottom: styling.spacing[16] },
   typeBtn: {
     flex: 1,
     paddingVertical: 12,
@@ -207,7 +250,5 @@ const styles = StyleSheet.create({
     borderColor: colors.primary[500],
     backgroundColor: colors.primary[100],
   },
-  deleteBtn: {
-    marginTop: styling.spacing[32],
-  }
+  deleteBtn: { marginTop: styling.spacing[32] },
 });

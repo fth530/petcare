@@ -48,12 +48,16 @@ export const RootNavigator = () => {
         <Stack.Screen
           name="AddEditPet"
           component={AddEditPetScreen}
-          options={({ route }: any) => ({ title: route.params?.petId ? 'Edit Pet' : 'Add New Pet' })}
+          options={({ route }) => ({
+            title: route.params?.petId ? 'Edit Pet' : 'Add New Pet',
+          })}
         />
         <Stack.Screen
           name="AddEditHealthEvent"
           component={AddEditHealthEventScreen}
-          options={({ route }: any) => ({ title: route.params?.eventId ? 'Edit Event' : 'Add Health Event' })}
+          options={({ route }) => ({
+            title: route.params?.eventId ? 'Edit Event' : 'Add Health Event',
+          })}
         />
       </Stack.Navigator>
     </NavigationContainer>

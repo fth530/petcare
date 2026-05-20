@@ -1,7 +1,7 @@
 import React from 'react';
-import { View, StyleSheet, FlatList, Pressable } from 'react-native';
+import { View, StyleSheet, FlatList, Pressable, ListRenderItem } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Animated, { FadeIn, SlideInDown } from 'react-native-reanimated';
+import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -11,6 +11,7 @@ import { Avatar } from '../components/Avatar';
 import { Button } from '../components/Button';
 import { colors, styling } from '../theme';
 import * as Haptics from 'expo-haptics';
+import { Pet } from '../types/PetCare';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PetList'>;
 
@@ -33,7 +34,7 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
     });
   }, [navigation]);
 
-  const renderItem = ({ item, index }: { item: any, index: number }) => (
+  const renderItem: ListRenderItem<Pet> = ({ item, index }) => (
     <Animated.View
       entering={FadeIn.delay(index * 100).duration(400).withInitialValues({ transform: [{ translateY: 20 }]})}
     >
