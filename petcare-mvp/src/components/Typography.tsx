@@ -7,7 +7,7 @@ interface TypographyProps extends TextProps {
   bold?: boolean;
 }
 
-export const Typography: React.FC<TypographyProps> = ({
+export const Typography: React.FC<TypographyProps> = React.memo(({
   variant = 'body',
   bold,
   style,
@@ -28,4 +28,6 @@ export const Typography: React.FC<TypographyProps> = ({
       {children}
     </Text>
   );
-};
+});
+
+Typography.displayName = 'Typography';

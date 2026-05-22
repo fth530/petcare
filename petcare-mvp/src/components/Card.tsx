@@ -6,13 +6,15 @@ interface CardProps extends ViewProps {
   children: React.ReactNode;
 }
 
-export const Card: React.FC<CardProps> = ({ children, style, ...props }) => {
+export const Card: React.FC<CardProps> = React.memo(({ children, style, ...props }) => {
   return (
     <View style={[styles.card, style]} {...props}>
       {children}
     </View>
   );
-};
+});
+
+Card.displayName = 'Card';
 
 const styles = StyleSheet.create({
   card: {

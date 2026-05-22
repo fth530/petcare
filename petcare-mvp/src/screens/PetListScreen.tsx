@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import { View, StyleSheet, FlatList, Pressable, ListRenderItem } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import Animated, { FadeIn } from 'react-native-reanimated';
@@ -23,10 +23,12 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
       headerRight: () => (
         <Pressable
           onPress={() => {
-            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+            Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
             navigation.navigate('AddEditPet', {});
           }}
           style={({ pressed }) => ({ opacity: pressed ? 0.7 : 1 })}
+          accessibilityLabel="Add new pet"
+          accessibilityRole="button"
         >
           <Ionicons name="add-circle-outline" size={28} color={colors.accent[500]} />
         </Pressable>
@@ -34,16 +36,18 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
     });
   }, [navigation]);
 
-  const renderItem: ListRenderItem<Pet> = ({ item, index }) => (
+  const renderItem: ListRenderItem<Pet> = useCallback(({ item, index }) => (
     <Animated.View
-      entering={FadeIn.delay(index * 100).duration(400).withInitialValues({ transform: [{ translateY: 20 }]})}
+      entering={FadeIn.delay(index * 100).duration(400)}
     >
       <Pressable
         onPress={() => {
-          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+          Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
           navigation.navigate('PetProfile', { petId: item.id });
         }}
         style={({ pressed }) => ({ transform: [{ scale: pressed ? 0.98 : 1 }] })}
+        accessibilityLabel={`View ${item.name}, ${item.breed}`}
+        accessibilityRole="button"
       >
         <Card style={styles.petCard}>
           <Avatar uri={item.avatarUri} size={64} style={styles.avatar} />
@@ -55,7 +59,7 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
         </Card>
       </Pressable>
     </Animated.View>
-  );
+  ), [navigation]);
 
   if (pets.length === 0) {
     return (
@@ -67,6 +71,7 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
           title="Add Your First Pet"
           onPress={() => navigation.navigate('AddEditPet', {})}
           style={styles.emptyButton}
+          accessibilityLabel="Add your first pet"
         />
       </View>
     );

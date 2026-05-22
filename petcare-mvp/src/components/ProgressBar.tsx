@@ -8,7 +8,7 @@ interface ProgressBarProps {
   style?: ViewStyle;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = ({ progress, style }) => {
+export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ progress, style }) => {
   const animatedProgress = useSharedValue(0);
 
   useEffect(() => {
@@ -29,7 +29,9 @@ export const ProgressBar: React.FC<ProgressBarProps> = ({ progress, style }) => 
       <Animated.View style={[styles.fill, animatedStyle]} />
     </View>
   );
-};
+});
+
+ProgressBar.displayName = 'ProgressBar';
 
 const styles = StyleSheet.create({
   container: {

@@ -8,13 +8,15 @@ interface AvatarProps {
   uri?: string;
   size?: number;
   style?: ViewStyle;
+  testID?: string;
 }
 
-export const Avatar: React.FC<AvatarProps> = ({ uri, size = 64, style }) => {
+export const Avatar: React.FC<AvatarProps> = React.memo(({ uri, size = 64, style, testID }) => {
   const [error, setError] = useState(false);
 
   return (
     <View
+      testID={testID}
       style={[
         styles.container,
         { width: size, height: size, borderRadius: size / 2 },
@@ -23,9 +25,13 @@ export const Avatar: React.FC<AvatarProps> = ({ uri, size = 64, style }) => {
     >
       {uri && !error ? (
         <Animated.Image
+          testID={testID ? `${testID}-image` : undefined}
           source={{ uri }}
           style={{ width: size, height: size, borderRadius: size / 2 }}
-          onError={() => setError(true)}
+          onError={() => {
+            console.warn('[Avatar] Failed to load image URI:', uri);
+            setError(true);
+          }}
           entering={FadeIn.duration(500)}
         />
       ) : (
@@ -33,7 +39,9 @@ export const Avatar: React.FC<AvatarProps> = ({ uri, size = 64, style }) => {
       )}
     </View>
   );
-};
+});
+
+Avatar.displayName = 'Avatar';
 
 const styles = StyleSheet.create({
   container: {

@@ -11,6 +11,7 @@ import { Button } from '../components/Button';
 import { Avatar } from '../components/Avatar';
 import { colors, styling } from '../theme';
 import { Pet } from '../types/PetCare';
+import { WEIGHT_MAX_KG, NAME_MAX_LENGTH } from '../constants';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'AddEditPet'>;
 
@@ -43,8 +44,19 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
   const handleSave = () => {
     if (!name.trim()) return;
 
+    if (name.trim().length > NAME_MAX_LENGTH) {
+      Alert.alert('Name Too Long', `Pet name must be ${NAME_MAX_LENGTH} characters or fewer.`);
+      return;
+    }
+
     if (dobStr && !isValidIsoDate(dobStr)) {
       Alert.alert('Invalid Date', 'Date of birth must be YYYY-MM-DD.');
+      return;
+    }
+
+    const parsedWeight = parseFloat(weightStr);
+    if (weightStr && (!isFinite(parsedWeight) || parsedWeight < 0 || parsedWeight > WEIGHT_MAX_KG)) {
+      Alert.alert('Invalid Weight', `Weight must be between 0 and ${WEIGHT_MAX_KG} kg.`);
       return;
     }
 
@@ -121,7 +133,12 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
   return (
     <ScrollView style={styles.container} contentContainerStyle={styles.content} keyboardShouldPersistTaps="handled">
       <View style={styles.avatarSection}>
-        <Pressable onPress={handlePickImage} style={styles.avatarPressable}>
+        <Pressable
+          onPress={handlePickImage}
+          style={styles.avatarPressable}
+          accessibilityLabel="Change pet photo"
+          accessibilityRole="button"
+        >
           <Avatar uri={avatarUri} size={120} />
           <View style={styles.cameraIconContainer}>
             <Ionicons name="camera" size={20} color={colors.neutral.white} />

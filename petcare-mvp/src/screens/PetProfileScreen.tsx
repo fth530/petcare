@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { View, StyleSheet, ScrollView, Pressable, Modal, Alert } from 'react-native';
+import React, { useState, useMemo, useCallback } from 'react';
+import { View, StyleSheet, ScrollView, Pressable, Modal, Alert, Keyboard } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -12,6 +12,12 @@ import { TextInput } from '../components/TextInput';
 import { colors, styling } from '../theme';
 import { Ionicons, MaterialCommunityIcons } from '@expo/vector-icons';
 import { format, isAfter, parseISO } from 'date-fns';
+import {
+  FOOD_TARGET_GRAMS,
+  FOOD_MAX_GRAMS,
+  HEALTH_EVENTS_DISPLAY_LIMIT,
+  WATER_DROPS_DISPLAY_LIMIT,
+} from '../constants';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PetProfile'>;
 
@@ -30,12 +36,91 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
     navigation.setOptions({
       title: pet.name,
       headerRight: () => (
-        <Pressable onPress={() => navigation.navigate('AddEditPet', { petId })}>
+        <Pressable
+          onPress={() => navigation.navigate('AddEditPet', { petId })}
+          accessibilityLabel={`Edit ${pet.name}`}
+          accessibilityRole="button"
+        >
           <Typography style={{ color: colors.accent[500], fontWeight: '600' }}>Edit</Typography>
         </Pressable>
       ),
     });
   }, [navigation, petId, pet]);
+
+  const today = useMemo(() => new Date().toISOString().split('T')[0], []);
+
+  const todaysFood = useMemo(
+    () =>
+      pet?.foodLogs
+        .filter((log) => log.date.startsWith(today))
+        .reduce((sum, log) => sum + log.amountGrams, 0) ?? 0,
+    [pet?.foodLogs, today]
+  );
+
+  const todaysWater = useMemo(
+    () =>
+      pet?.waterLogs
+        .filter((log) => log.date.startsWith(today))
+        .reduce((sum, log) => sum + log.servings, 0) ?? 0,
+    [pet?.waterLogs, today]
+  );
+
+  const foodProgress = useMemo(
+    () => Math.min(todaysFood / FOOD_TARGET_GRAMS, 1),
+    [todaysFood]
+  );
+
+  const lastFed = useMemo(() => {
+    if (!pet || pet.foodLogs.length === 0) return 'Never';
+    return format(parseISO(pet.foodLogs[pet.foodLogs.length - 1].date), 'h:mm a');
+  }, [pet?.foodLogs]);
+
+  const recentHealthEvents = useMemo(
+    () => pet?.healthEvents.slice(0, HEALTH_EVENTS_DISPLAY_LIMIT) ?? [],
+    [pet?.healthEvents]
+  );
+
+  const nextVaccine = useMemo(() => {
+    if (!pet) return null;
+    const upcoming = pet.healthEvents
+      .filter((e) => isAfter(parseISO(e.date), new Date()))
+      .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
+    return upcoming.find((e) => e.type === 'vaccine') ?? null;
+  }, [pet?.healthEvents]);
+
+  const handleAddFood = useCallback(() => {
+    const amount = parseInt(foodAmount, 10);
+    if (!isNaN(amount) && amount > 0 && amount <= FOOD_MAX_GRAMS) {
+      addFoodLog(petId, { date: new Date().toISOString(), amountGrams: amount });
+      Keyboard.dismiss();
+      setFoodModalVisible(false);
+      setFoodAmount('');
+    }
+  }, [foodAmount, petId, addFoodLog]);
+
+  const handleAddWater = useCallback(() => {
+    addWaterLog(petId, { date: new Date().toISOString(), servings: 1 });
+  }, [petId, addWaterLog]);
+
+  const handleCloseFoodModal = useCallback(() => {
+    Keyboard.dismiss();
+    setFoodModalVisible(false);
+    setFoodAmount('');
+  }, []);
+
+  const handleLongPressEvent = useCallback(
+    (eventId: string, title: string) => {
+      Alert.alert('Delete Event', `Remove "${title}"?`, [
+        { text: 'Cancel', style: 'cancel' },
+        {
+          text: 'Delete',
+          style: 'destructive',
+          onPress: () => deleteHealthEvent(petId, eventId),
+        },
+      ]);
+    },
+    [petId, deleteHealthEvent]
+  );
 
   if (!pet) {
     return (
@@ -44,51 +129,6 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
       </View>
     );
   }
-
-  const today = new Date().toISOString().split('T')[0];
-  const todaysFood = pet.foodLogs
-    .filter((log) => log.date.startsWith(today))
-    .reduce((sum, log) => sum + log.amountGrams, 0);
-  const targetFood = 300;
-  const foodProgress = Math.min(todaysFood / targetFood, 1);
-
-  const todaysWater = pet.waterLogs
-    .filter((log) => log.date.startsWith(today))
-    .reduce((sum, log) => sum + log.servings, 0);
-
-  const lastFed =
-    pet.foodLogs.length > 0
-      ? format(parseISO(pet.foodLogs[pet.foodLogs.length - 1].date), 'h:mm a')
-      : 'Never';
-
-  const upcomingEvents = pet.healthEvents
-    .filter((e) => isAfter(parseISO(e.date), new Date()))
-    .sort((a, b) => parseISO(a.date).getTime() - parseISO(b.date).getTime());
-  const nextVaccine = upcomingEvents.find((e) => e.type === 'vaccine');
-
-  const handleAddFood = () => {
-    const amount = parseInt(foodAmount, 10);
-    if (!isNaN(amount) && amount > 0) {
-      addFoodLog(petId, { date: new Date().toISOString(), amountGrams: amount });
-      setFoodModalVisible(false);
-      setFoodAmount('');
-    }
-  };
-
-  const handleAddWater = () => {
-    addWaterLog(petId, { date: new Date().toISOString(), servings: 1 });
-  };
-
-  const handleLongPressEvent = (eventId: string, title: string) => {
-    Alert.alert('Delete Event', `Remove "${title}"?`, [
-      { text: 'Cancel', style: 'cancel' },
-      {
-        text: 'Delete',
-        style: 'destructive',
-        onPress: () => deleteHealthEvent(petId, eventId),
-      },
-    ]);
-  };
 
   return (
     <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -126,7 +166,7 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         <View style={styles.nutritionRow}>
           <View style={styles.nutritionInfo}>
             <Typography style={styles.nutritionLabel}>Food</Typography>
-            <Typography variant="caption">{todaysFood} / {targetFood}g</Typography>
+            <Typography variant="caption">{todaysFood} / {FOOD_TARGET_GRAMS}g</Typography>
           </View>
           <ProgressBar progress={foodProgress} style={styles.progressBar} />
         </View>
@@ -137,25 +177,43 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
             <Typography variant="caption">{todaysWater} Servings</Typography>
           </View>
           <View style={styles.waterDrops}>
-            {Array.from({ length: Math.min(todaysWater, 5) }).map((_, i) => (
+            {Array.from({ length: Math.min(todaysWater, WATER_DROPS_DISPLAY_LIMIT) }).map((_, i) => (
               <Ionicons key={i} name="water" size={20} color={colors.primary[500]} style={{ marginRight: 4 }} />
             ))}
-            {todaysWater > 5 && <Typography variant="caption">+{todaysWater - 5}</Typography>}
+            {todaysWater > WATER_DROPS_DISPLAY_LIMIT && (
+              <Typography variant="caption">+{todaysWater - WATER_DROPS_DISPLAY_LIMIT}</Typography>
+            )}
             {todaysWater === 0 && <Typography variant="caption">None yet</Typography>}
           </View>
         </View>
 
         <View style={styles.actionRow}>
-          <Button title="+ Food" variant="secondary" style={styles.actionBtn} onPress={() => setFoodModalVisible(true)} />
+          <Button
+            title="+ Food"
+            variant="secondary"
+            style={styles.actionBtn}
+            onPress={() => setFoodModalVisible(true)}
+            accessibilityLabel="Log food intake"
+          />
           <View style={{ width: 16 }} />
-          <Button title="+ Water" variant="secondary" style={styles.actionBtn} onPress={handleAddWater} />
+          <Button
+            title="+ Water"
+            variant="secondary"
+            style={styles.actionBtn}
+            onPress={handleAddWater}
+            accessibilityLabel="Log water intake"
+          />
         </View>
       </Card>
 
       <Card style={styles.sectionCard}>
         <View style={styles.sectionHeader}>
           <Typography variant="heading" style={styles.sectionTitle}>Health Calendar</Typography>
-          <Pressable onPress={() => navigation.navigate('AddEditHealthEvent', { petId })}>
+          <Pressable
+            onPress={() => navigation.navigate('AddEditHealthEvent', { petId })}
+            accessibilityLabel="Add health event"
+            accessibilityRole="button"
+          >
             <Ionicons name="add-circle-outline" size={24} color={colors.accent[500]} />
           </Pressable>
         </View>
@@ -165,12 +223,14 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
             No health events logged yet.
           </Typography>
         ) : (
-          pet.healthEvents.slice(0, 5).map((event) => (
+          recentHealthEvents.map((event) => (
             <Pressable
               key={event.id}
               style={styles.eventItem}
               onPress={() => navigation.navigate('AddEditHealthEvent', { petId, eventId: event.id })}
               onLongPress={() => handleLongPressEvent(event.id, event.title)}
+              accessibilityLabel={`${event.title}, ${format(parseISO(event.date), 'MMM d, yyyy')}. Long press to delete.`}
+              accessibilityRole="button"
             >
               <View
                 style={[
@@ -196,7 +256,12 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
 
       <View style={{ height: 40 }} />
 
-      <Modal visible={foodModalVisible} transparent animationType="fade" onRequestClose={() => setFoodModalVisible(false)}>
+      <Modal
+        visible={foodModalVisible}
+        transparent
+        animationType="fade"
+        onRequestClose={handleCloseFoodModal}
+      >
         <View style={styles.modalOverlay}>
           <View style={styles.modalContent}>
             <Typography variant="heading" style={{ marginBottom: 16 }}>Log Food</Typography>
@@ -205,12 +270,25 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
               keyboardType="numeric"
               value={foodAmount}
               onChangeText={setFoodAmount}
+              placeholder="Amount in grams (e.g., 150)"
               autoFocus
+              accessibilityLabel="Food amount in grams"
             />
             <View style={[styles.actionRow, { marginTop: 16 }]}>
-              <Button title="Cancel" variant="secondary" style={styles.actionBtn} onPress={() => setFoodModalVisible(false)} />
+              <Button
+                title="Cancel"
+                variant="secondary"
+                style={styles.actionBtn}
+                onPress={handleCloseFoodModal}
+                accessibilityLabel="Cancel food log"
+              />
               <View style={{ width: 16 }} />
-              <Button title="Save" style={styles.actionBtn} onPress={handleAddFood} />
+              <Button
+                title="Save"
+                style={styles.actionBtn}
+                onPress={handleAddFood}
+                accessibilityLabel="Save food log"
+              />
             </View>
           </View>
         </View>

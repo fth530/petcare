@@ -41,7 +41,7 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const handlePress = (e: any) => {
-    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light);
+    Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     if (onPress) onPress(e);
   };
 
@@ -71,6 +71,7 @@ export const Button: React.FC<ButtonProps> = ({
       onPressOut={handlePressOut}
       onPress={handlePress}
       disabled={disabled}
+      accessibilityRole="button"
       style={[
         styles.button,
         { backgroundColor: getBackgroundColor() },
