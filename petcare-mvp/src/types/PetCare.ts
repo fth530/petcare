@@ -81,6 +81,23 @@ export interface Photo {
   caption?: string;
 }
 
+export interface CareTask {
+  id: string;
+  name: string;
+  type: 'bath' | 'nails' | 'dental' | 'deworming' | 'flea_treatment' | 'ear_clean' | 'other';
+  frequencyDays: number;
+  lastDone?: string;
+  notes?: string;
+}
+
+export interface Symptom {
+  id: string;
+  date: string;
+  description: string;
+  severity: 'mild' | 'moderate' | 'severe';
+  notes?: string;
+}
+
 export interface Pet {
   id: string;
   name: string;
@@ -102,4 +119,6 @@ export interface Pet {
   activityLogs: ActivityLog[];
   expenses: Expense[];
   photos: Photo[];
+  careTasks: CareTask[];
+  symptoms: Symptom[];
 }

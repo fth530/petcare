@@ -1,8 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Alert, Image, Modal, useWindowDimensions } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
+import * as Sharing from 'expo-sharing';
 import { format, parseISO } from 'date-fns';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -28,6 +29,7 @@ export const PhotoAlbumScreen: React.FC<Props> = ({ route }) => {
   const [caption, setCaption] = useState('');
   const [previewUri, setPreviewUri] = useState<string | null>(null);
   const [selectedPhoto, setSelectedPhoto] = useState<string | null>(null);
+  const [selectedPhotoId, setSelectedPhotoId] = useState<string | null>(null);
 
   const cellSize = (width - 32 - 8) / 3;
 
@@ -58,6 +60,27 @@ export const PhotoAlbumScreen: React.FC<Props> = ({ route }) => {
       { text: t('delete'), style: 'destructive', onPress: () => deletePhoto(petId, photoId) },
     ]);
   };
+
+  const handleShare = useCallback(async (uri: string) => {
+    try {
+      const isAvailable = await Sharing.isAvailableAsync();
+      if (isAvailable) {
+        await Sharing.shareAsync(uri);
+      } else {
+        Alert.alert('Sharing not available', 'Sharing is not supported on this device.');
+      }
+    } catch {
+      Alert.alert('Error', 'Could not share this photo.');
+    }
+  }, []);
+
+  const handlePhotoPress = useCallback((photoId: string, uri: string) => {
+    Alert.alert('Photo Options', 'What would you like to do?', [
+      { text: 'View Full', onPress: () => { setSelectedPhoto(uri); setSelectedPhotoId(photoId); } },
+      { text: 'Share', onPress: () => handleShare(uri) },
+      { text: t('cancel'), style: 'cancel' },
+    ]);
+  }, [handleShare, t]);
 
   if (!pet) return null;
 
@@ -98,7 +121,7 @@ export const PhotoAlbumScreen: React.FC<Props> = ({ route }) => {
         <View style={styles.grid}>
           {sortedPhotos.map((photo) => (
             <Pressable key={photo.id} style={[styles.gridCell, { width: cellSize, height: cellSize }]}
-              onPress={() => setSelectedPhoto(photo.uri)}
+              onPress={() => handlePhotoPress(photo.id, photo.uri)}
               onLongPress={() => handleDelete(photo.id)}
               accessibilityRole="button">
               <Image source={{ uri: photo.uri }} style={styles.gridImage} resizeMode="cover" />
@@ -117,13 +140,24 @@ export const PhotoAlbumScreen: React.FC<Props> = ({ route }) => {
       </Typography>
 
       {/* Full screen viewer */}
-      <Modal visible={!!selectedPhoto} transparent animationType="fade" onRequestClose={() => setSelectedPhoto(null)}>
+      <Modal visible={!!selectedPhoto} transparent animationType="fade" onRequestClose={() => { setSelectedPhoto(null); setSelectedPhotoId(null); }}>
         <View style={styles.viewerOverlay}>
-          <Pressable style={styles.viewerClose} onPress={() => setSelectedPhoto(null)} accessibilityRole="button">
+          <Pressable style={styles.viewerClose} onPress={() => { setSelectedPhoto(null); setSelectedPhotoId(null); }} accessibilityRole="button">
             <Ionicons name="close" size={28} color="#fff" />
           </Pressable>
           {selectedPhoto && (
             <Image source={{ uri: selectedPhoto }} style={styles.viewerImage} resizeMode="contain" />
+          )}
+          {selectedPhoto && (
+            <Pressable
+              style={styles.viewerShare}
+              onPress={() => handleShare(selectedPhoto)}
+              accessibilityRole="button"
+              accessibilityLabel="Share photo"
+            >
+              <Ionicons name="share-outline" size={24} color="#fff" />
+              <Typography style={{ color: '#fff', marginLeft: 6 }}>Share</Typography>
+            </Pressable>
           )}
         </View>
       </Modal>
@@ -148,4 +182,11 @@ const styles = StyleSheet.create({
   viewerOverlay: { flex: 1, backgroundColor: '#000', justifyContent: 'center', alignItems: 'center' },
   viewerClose: { position: 'absolute', top: 48, right: 16, zIndex: 10 },
   viewerImage: { width: '100%', height: '80%' },
+  viewerShare: {
+    position: 'absolute', bottom: 48,
+    flexDirection: 'row', alignItems: 'center',
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    paddingHorizontal: 20, paddingVertical: 10,
+    borderRadius: 24,
+  },
 });

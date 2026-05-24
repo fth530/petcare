@@ -133,6 +133,18 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
         )}
       </View>
 
+      {/* Compare button */}
+      {pets.length >= 2 && (
+        <Pressable
+          onPress={() => navigation.navigate('Compare')}
+          style={[styles.compareBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+          accessibilityRole="button"
+          accessibilityLabel={t('compareTitle')}
+        >
+          <Typography style={{ color: colors.primary[500], fontWeight: '600', fontSize: 14 }}>⚖️ {t('compareTitle')}</Typography>
+        </Pressable>
+      )}
+
       {/* Filter chips */}
       <View style={styles.filterRow}>
         {filters.map(({ key, label }) => (
@@ -192,4 +204,10 @@ const styles = StyleSheet.create({
   filterRow: { flexDirection: 'row', paddingHorizontal: styling.spacing[16], marginTop: styling.spacing[8], gap: 8 },
   chip: { paddingHorizontal: 14, paddingVertical: 6, borderRadius: 20, borderWidth: 1 },
   noResults: { alignItems: 'center', marginTop: 40 },
+  compareBtn: {
+    marginHorizontal: styling.spacing[16], marginTop: 8,
+    paddingVertical: 10, paddingHorizontal: 16,
+    borderRadius: styling.borderRadius, borderWidth: 1,
+    alignItems: 'center',
+  },
 });

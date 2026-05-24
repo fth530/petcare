@@ -17,6 +17,11 @@ import { PhotoAlbumScreen } from '../screens/PhotoAlbumScreen';
 import { PetPassportScreen } from '../screens/PetPassportScreen';
 import { VetMapScreen } from '../screens/VetMapScreen';
 import { InsuranceScreen } from '../screens/InsuranceScreen';
+import { CareScheduleScreen } from '../screens/CareScheduleScreen';
+import { NutritionScreen } from '../screens/NutritionScreen';
+import { CompareScreen } from '../screens/CompareScreen';
+import { AIAdviceScreen } from '../screens/AIAdviceScreen';
+import { SymptomsScreen } from '../screens/SymptomsScreen';
 import { useTheme } from '../context/ThemeContext';
 
 export type RootStackParamList = {
@@ -36,6 +41,11 @@ export type RootStackParamList = {
   PetPassport: { petId: string };
   VetMap: undefined;
   Insurance: undefined;
+  CareSchedule: { petId: string };
+  Nutrition: { petId: string };
+  Compare: undefined;
+  AIAdvice: { petId: string };
+  Symptoms: { petId: string };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -89,6 +99,11 @@ export const RootNavigator = () => {
         <Stack.Screen name="PetPassport" component={PetPassportScreen} options={{ title: 'Pet Passport' }} />
         <Stack.Screen name="VetMap" component={VetMapScreen} options={{ title: 'Vet Clinics' }} />
         <Stack.Screen name="Insurance" component={InsuranceScreen} options={{ title: 'Insurance' }} />
+        <Stack.Screen name="CareSchedule" component={CareScheduleScreen} options={{ title: 'Care Schedule' }} />
+        <Stack.Screen name="Nutrition" component={NutritionScreen} options={{ title: 'Nutrition Analysis' }} />
+        <Stack.Screen name="Compare" component={CompareScreen} options={{ title: 'Compare Pets' }} />
+        <Stack.Screen name="AIAdvice" component={AIAdviceScreen} options={{ title: 'AI Advice' }} />
+        <Stack.Screen name="Symptoms" component={SymptomsScreen} options={{ title: 'Symptoms' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

@@ -16,6 +16,7 @@ import {
   scheduleVaccineReminders,
   scheduleDailyFeedingReminder,
   cancelAllReminders,
+  scheduleBirthdayReminders,
 } from '../services/NotificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
@@ -27,6 +28,7 @@ export const SettingsScreen: React.FC<Props> = () => {
   const [notifsEnabled, setNotifsEnabled] = useState(false);
   const [feedingEnabled, setFeedingEnabled] = useState(false);
   const [vaccineEnabled, setVaccineEnabled] = useState(false);
+  const [birthdayEnabled, setBirthdayEnabled] = useState(false);
 
   const toggleNotifs = async (val: boolean) => {
     if (val) {
@@ -46,6 +48,11 @@ export const SettingsScreen: React.FC<Props> = () => {
   const toggleVaccine = async (val: boolean) => {
     setVaccineEnabled(val);
     if (val) { await scheduleVaccineReminders(pets); Alert.alert(t('notifScheduled'), 'Vaccine reminders scheduled!'); }
+  };
+
+  const toggleBirthday = async (val: boolean) => {
+    setBirthdayEnabled(val);
+    if (val) { await scheduleBirthdayReminders(pets); Alert.alert(t('notifScheduled'), 'Birthday reminders scheduled!'); }
   };
 
   const handleExport = async () => {
@@ -112,6 +119,9 @@ export const SettingsScreen: React.FC<Props> = () => {
             </Row>
             <Row icon="medical-outline" label={t('vaccineReminder')}>
               <Switch value={vaccineEnabled} onValueChange={toggleVaccine} trackColor={{ true: colors.primary[500] }} />
+            </Row>
+            <Row icon="gift-outline" label={t('birthdayNotif')}>
+              <Switch value={birthdayEnabled} onValueChange={toggleBirthday} trackColor={{ true: colors.primary[500] }} />
             </Row>
           </>
         )}

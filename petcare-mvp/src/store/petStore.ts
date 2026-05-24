@@ -4,6 +4,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import {
   Pet, HealthEvent, FoodLog, WaterLog, WeightLog, GroomingLog,
   Medication, MedicationDoseLog, ActivityLog, Expense, Photo,
+  CareTask, Symptom,
 } from '../types/PetCare';
 import { FOOD_TARGET_GRAMS, WATER_TARGET_SERVINGS } from '../constants';
 
@@ -14,7 +15,7 @@ interface PetStore {
 
   setHasHydrated: (value: boolean) => void;
 
-  addPet: (pet: Omit<Pet, 'id' | 'healthEvents' | 'foodLogs' | 'waterLogs' | 'weightLogs' | 'groomingLogs' | 'medications' | 'activityLogs' | 'expenses' | 'photos'>) => void;
+  addPet: (pet: Omit<Pet, 'id' | 'healthEvents' | 'foodLogs' | 'waterLogs' | 'weightLogs' | 'groomingLogs' | 'medications' | 'activityLogs' | 'expenses' | 'photos' | 'careTasks' | 'symptoms'>) => void;
   updatePet: (petId: string, updates: Partial<Pet>) => void;
   deletePet: (petId: string) => void;
 
@@ -44,6 +45,14 @@ interface PetStore {
 
   addPhoto: (petId: string, photo: Omit<Photo, 'id'>) => void;
   deletePhoto: (petId: string, photoId: string) => void;
+
+  addCareTask: (petId: string, task: Omit<CareTask, 'id'>) => void;
+  updateCareTask: (petId: string, taskId: string, updates: Partial<Omit<CareTask, 'id'>>) => void;
+  deleteCareTask: (petId: string, taskId: string) => void;
+  markCareTaskDone: (petId: string, taskId: string) => void;
+
+  addSymptom: (petId: string, symptom: Omit<Symptom, 'id'>) => void;
+  deleteSymptom: (petId: string, symptomId: string) => void;
 
   loadMockDataIfEmpty: () => void;
 }
@@ -117,6 +126,12 @@ const mockPet: Pet = {
     { id: 'exp-3', date: new Date(Date.now() - 7 * 86400000).toISOString(), category: 'medicine', amount: 28, description: 'Heartgard Plus' },
   ],
   photos: [],
+  careTasks: [
+    { id: 'ct-1', name: 'Bath', type: 'bath', frequencyDays: 14, lastDone: new Date(Date.now() - 12 * 86400000).toISOString() },
+    { id: 'ct-2', name: 'Nail Trim', type: 'nails', frequencyDays: 21, lastDone: new Date(Date.now() - 18 * 86400000).toISOString() },
+    { id: 'ct-3', name: 'Dental', type: 'dental', frequencyDays: 7 },
+  ],
+  symptoms: [],
 };
 
 const generateId = () =>
@@ -156,6 +171,8 @@ export const usePetStore = create<PetStore>()(
               activityLogs: [],
               expenses: [],
               photos: [],
+              careTasks: [],
+              symptoms: [],
             },
           ],
         })),
@@ -302,6 +319,50 @@ export const usePetStore = create<PetStore>()(
         set((state) => ({
           pets: patchPet(state.pets, petId, (p) => ({
             photos: (p.photos ?? []).filter((ph) => ph.id !== photoId),
+          })),
+        })),
+
+      addCareTask: (petId, taskData) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            careTasks: [...(p.careTasks ?? []), { ...taskData, id: generateId() }],
+          })),
+        })),
+
+      updateCareTask: (petId, taskId, updates) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            careTasks: (p.careTasks ?? []).map((t) => (t.id === taskId ? { ...t, ...updates } : t)),
+          })),
+        })),
+
+      deleteCareTask: (petId, taskId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            careTasks: (p.careTasks ?? []).filter((t) => t.id !== taskId),
+          })),
+        })),
+
+      markCareTaskDone: (petId, taskId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            careTasks: (p.careTasks ?? []).map((t) =>
+              t.id === taskId ? { ...t, lastDone: new Date().toISOString() } : t
+            ),
+          })),
+        })),
+
+      addSymptom: (petId, symptomData) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            symptoms: [...(p.symptoms ?? []), { ...symptomData, id: generateId() }],
+          })),
+        })),
+
+      deleteSymptom: (petId, symptomId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            symptoms: (p.symptoms ?? []).filter((s) => s.id !== symptomId),
           })),
         })),
     }),

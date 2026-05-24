@@ -211,12 +211,29 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         ))}
       </View>
 
-      {/* Passport & placeholders row */}
+      {/* Row 3: PetPassport, CareSchedule, Nutrition, AIAdvice */}
       <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
         {[
           { icon: 'id-card-outline', color: colors.primary[700], label: t('petPassport'), screen: 'PetPassport' },
+          { icon: 'checkmark-circle-outline', color: '#6366f1', label: t('careSchedule'), screen: 'CareSchedule' },
+          { icon: 'nutrition-outline', color: '#10b981', label: t('nutritionAnalysis'), screen: 'Nutrition' },
+          { icon: 'sparkles-outline', color: '#f59e0b', label: t('aiAdvice'), screen: 'AIAdvice' },
+        ].map((item) => (
+          <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={() => navigation.navigate(item.screen as any, { petId })}
+            accessibilityRole="button">
+            <Ionicons name={item.icon as any} size={22} color={item.color} />
+            <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Row 4: VetMap, Insurance, Symptoms, CallVet */}
+      <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
+        {[
           { icon: 'map-outline', color: colors.neutral[300], label: t('vetMap'), screen: 'VetMap', noParam: true },
           { icon: 'shield-outline', color: colors.neutral[300], label: t('insurance'), screen: 'Insurance', noParam: true },
+          { icon: 'pulse-outline', color: colors.error, label: t('symptoms'), screen: 'Symptoms' },
           pet.vet?.phone ? { icon: 'call-outline', color: colors.success, label: t('callVet'), screen: 'callVet', isCall: true } : null,
         ].filter(Boolean).map((item: any) => (
           <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}

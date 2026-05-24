@@ -104,6 +104,28 @@ export const translations = {
     vetMap: 'Vet Clinics', vetMapDesc: 'Find nearby veterinary clinics.',
     // Insurance
     insurance: 'Insurance', insuranceDesc: 'Manage your pet insurance policies.',
+    // Birthday
+    birthdayNotif: 'Birthday Reminders', birthdayNotifDesc: "Get notified on your pet's birthday",
+    // Care Schedule
+    careSchedule: 'Care Schedule', addCareTask: 'Add Task', careTaskName: 'Task Name',
+    careFrequency: 'Frequency (days)', careLastDone: 'Last done', careDue: 'Due',
+    careOverdue: 'Overdue', noCareTask: 'No care tasks yet.', markDone: 'Mark Done',
+    deleteCareTask: 'Delete this task?', daysLeft: 'days left', daysAgo: 'days ago',
+    // Nutrition
+    nutritionAnalysis: 'Nutrition Analysis', dailyCalories: 'Daily Calories Needed',
+    recommendedFood: 'Recommended Food', currentIntake: 'Avg. Intake (7d)',
+    nutritionTip: 'Nutrition Tip', calorieKcal: 'kcal/day',
+    // Compare
+    compareTitle: 'Compare Pets', selectToCompare: 'Select pets to compare',
+    comparison: 'Comparison',
+    // AI Advice
+    aiAdvice: 'AI Advice', aiAdviceDesc: 'Smart recommendations for your pet',
+    aiLoading: "Analyzing your pet's data...", aiComingSoon: 'Full AI powered by Gemini API coming soon.',
+    // Symptoms
+    symptoms: 'Symptoms', addSymptom: 'Log Symptom', symptomDesc: 'Description',
+    symptomSeverity: 'Severity', sevMild: 'Mild', sevModerate: 'Moderate', sevSevere: 'Severe',
+    noSymptoms: 'No symptoms logged.', deleteSymptom: 'Delete this symptom?',
+    aiSymptomNote: 'AI analysis coming soon — powered by Gemini API',
   },
   tr: {
     save: 'Kaydet', cancel: 'İptal', delete: 'Sil', edit: 'Düzenle', add: 'Ekle',
@@ -198,6 +220,28 @@ export const translations = {
     vetMap: 'Veteriner Klinikleri', vetMapDesc: 'Yakındaki veteriner kliniklerini bulun.',
     // Insurance
     insurance: 'Sigorta', insuranceDesc: 'Evcil hayvan sigorta poliçelerinizi yönetin.',
+    // Birthday
+    birthdayNotif: 'Doğum Günü Hatırlatıcıları', birthdayNotifDesc: 'Evcil hayvanınızın doğum gününde bildirim alın',
+    // Care Schedule
+    careSchedule: 'Bakım Takvimi', addCareTask: 'Görev Ekle', careTaskName: 'Görev Adı',
+    careFrequency: 'Sıklık (gün)', careLastDone: 'Son yapıldı', careDue: 'Zamanı geldi',
+    careOverdue: 'Gecikmiş', noCareTask: 'Henüz bakım görevi yok.', markDone: 'Tamamlandı',
+    deleteCareTask: 'Bu görevi sil?', daysLeft: 'gün kaldı', daysAgo: 'gün önce',
+    // Nutrition
+    nutritionAnalysis: 'Beslenme Analizi', dailyCalories: 'Günlük Kalori İhtiyacı',
+    recommendedFood: 'Önerilen Yemek', currentIntake: 'Ort. Alım (7g)',
+    nutritionTip: 'Beslenme İpucu', calorieKcal: 'kkal/gün',
+    // Compare
+    compareTitle: 'Evcil Hayvanları Karşılaştır', selectToCompare: 'Karşılaştırmak için seçin',
+    comparison: 'Karşılaştırma',
+    // AI Advice
+    aiAdvice: 'AI Tavsiye', aiAdviceDesc: 'Evcil hayvanınız için akıllı öneriler',
+    aiLoading: 'Verileriniz analiz ediliyor...', aiComingSoon: 'Tam AI desteği yakında Gemini API ile gelecek.',
+    // Symptoms
+    symptoms: 'Semptomlar', addSymptom: 'Semptom Ekle', symptomDesc: 'Açıklama',
+    symptomSeverity: 'Şiddet', sevMild: 'Hafif', sevModerate: 'Orta', sevSevere: 'Şiddetli',
+    noSymptoms: 'Semptom kaydı yok.', deleteSymptom: 'Bu semptomu sil?',
+    aiSymptomNote: 'AI analizi yakında — Gemini API ile desteklenecek',
   },
 } as const;
 

@@ -62,3 +62,21 @@ export async function scheduleDailyFeedingReminder(hour: number, minute: number)
 export async function cancelAllReminders(): Promise<void> {
   await Notifications.cancelAllScheduledNotificationsAsync();
 }
+
+export async function scheduleBirthdayReminders(pets: Pet[]): Promise<void> {
+  for (const pet of pets) {
+    if (!pet.dateOfBirth) continue;
+    const dob = parseISO(pet.dateOfBirth);
+    const now = new Date();
+    let nextBirthday = new Date(now.getFullYear(), dob.getMonth(), dob.getDate());
+    if (nextBirthday <= now) nextBirthday = new Date(now.getFullYear() + 1, dob.getMonth(), dob.getDate());
+    await Notifications.scheduleNotificationAsync({
+      content: {
+        title: `🎂 Happy Birthday, ${pet.name}!`,
+        body: `Today is ${pet.name}'s birthday! Give them extra love!`,
+        data: { petId: pet.id },
+      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DATE, date: nextBirthday },
+    });
+  }
+}
