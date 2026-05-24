@@ -6,9 +6,10 @@ import { colors, styling } from '../theme';
 interface ProgressBarProps {
   progress: number; // 0 to 1
   style?: ViewStyle;
+  color?: string;
 }
 
-export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ progress, style }) => {
+export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ progress, style, color }) => {
   const animatedProgress = useSharedValue(0);
 
   useEffect(() => {
@@ -26,7 +27,7 @@ export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ progress, s
 
   return (
     <View style={[styles.container, style]}>
-      <Animated.View style={[styles.fill, animatedStyle]} />
+      <Animated.View style={[styles.fill, animatedStyle, color ? { backgroundColor: color } : null]} />
     </View>
   );
 });

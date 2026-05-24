@@ -1,7 +1,8 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Pet, HealthEvent, FoodLog, WaterLog } from '../types/PetCare';
+import { Pet, HealthEvent, FoodLog, WaterLog, WeightLog, GroomingLog } from '../types/PetCare';
+import { FOOD_TARGET_GRAMS, WATER_TARGET_SERVINGS } from '../constants';
 
 interface PetStore {
   pets: Pet[];
@@ -10,7 +11,7 @@ interface PetStore {
 
   setHasHydrated: (value: boolean) => void;
 
-  addPet: (pet: Omit<Pet, 'id' | 'healthEvents' | 'foodLogs' | 'waterLogs'>) => void;
+  addPet: (pet: Omit<Pet, 'id' | 'healthEvents' | 'foodLogs' | 'waterLogs' | 'weightLogs' | 'groomingLogs'>) => void;
   updatePet: (petId: string, updates: Partial<Pet>) => void;
   deletePet: (petId: string) => void;
 
@@ -21,8 +22,16 @@ interface PetStore {
   addFoodLog: (petId: string, log: Omit<FoodLog, 'id'>) => void;
   addWaterLog: (petId: string, log: Omit<WaterLog, 'id'>) => void;
 
+  addWeightLog: (petId: string, log: Omit<WeightLog, 'id'>) => void;
+  deleteWeightLog: (petId: string, logId: string) => void;
+
+  addGroomingLog: (petId: string, log: Omit<GroomingLog, 'id'>) => void;
+  deleteGroomingLog: (petId: string, logId: string) => void;
+
   loadMockDataIfEmpty: () => void;
 }
+
+const DEFAULT_VET = { name: '', clinic: '', phone: '', notes: '' };
 
 const mockPet: Pet = {
   id: 'mock-1',
@@ -32,6 +41,9 @@ const mockPet: Pet = {
   dateOfBirth: '2021-05-10T00:00:00.000Z',
   gender: 'male',
   weightKg: 32,
+  foodTargetGrams: 320,
+  waterTargetServings: 4,
+  vet: { name: 'Dr. Smith', clinic: 'City Vet Clinic', phone: '+1 555 0123', notes: '' },
   healthEvents: [
     {
       id: 'event-1',
@@ -52,6 +64,16 @@ const mockPet: Pet = {
   ],
   waterLogs: [
     { id: 'water-1', date: new Date().toISOString(), servings: 2 },
+  ],
+  weightLogs: [
+    { id: 'w-1', date: new Date(Date.now() - 90 * 86400000).toISOString(), weightKg: 30 },
+    { id: 'w-2', date: new Date(Date.now() - 60 * 86400000).toISOString(), weightKg: 31 },
+    { id: 'w-3', date: new Date(Date.now() - 30 * 86400000).toISOString(), weightKg: 31.5 },
+    { id: 'w-4', date: new Date().toISOString(), weightKg: 32 },
+  ],
+  groomingLogs: [
+    { id: 'g-1', date: new Date(Date.now() - 14 * 86400000).toISOString(), type: 'bath' },
+    { id: 'g-2', date: new Date(Date.now() - 7 * 86400000).toISOString(), type: 'nails' },
   ],
 };
 
@@ -83,6 +105,8 @@ export const usePetStore = create<PetStore>()(
               healthEvents: [],
               foodLogs: [],
               waterLogs: [],
+              weightLogs: [],
+              groomingLogs: [],
             },
           ],
         })),
@@ -103,13 +127,7 @@ export const usePetStore = create<PetStore>()(
         set((state) => ({
           pets: state.pets.map((pet) =>
             pet.id === petId
-              ? {
-                  ...pet,
-                  healthEvents: [
-                    ...pet.healthEvents,
-                    { ...eventData, id: generateId() },
-                  ],
-                }
+              ? { ...pet, healthEvents: [...pet.healthEvents, { ...eventData, id: generateId() }] }
               : pet
           ),
         })),
@@ -132,10 +150,7 @@ export const usePetStore = create<PetStore>()(
         set((state) => ({
           pets: state.pets.map((pet) =>
             pet.id === petId
-              ? {
-                  ...pet,
-                  healthEvents: pet.healthEvents.filter((e) => e.id !== eventId),
-                }
+              ? { ...pet, healthEvents: pet.healthEvents.filter((e) => e.id !== eventId) }
               : pet
           ),
         })),
@@ -144,10 +159,7 @@ export const usePetStore = create<PetStore>()(
         set((state) => ({
           pets: state.pets.map((pet) =>
             pet.id === petId
-              ? {
-                  ...pet,
-                  foodLogs: [...pet.foodLogs, { ...logData, id: generateId() }],
-                }
+              ? { ...pet, foodLogs: [...pet.foodLogs, { ...logData, id: generateId() }] }
               : pet
           ),
         })),
@@ -156,10 +168,43 @@ export const usePetStore = create<PetStore>()(
         set((state) => ({
           pets: state.pets.map((pet) =>
             pet.id === petId
-              ? {
-                  ...pet,
-                  waterLogs: [...pet.waterLogs, { ...logData, id: generateId() }],
-                }
+              ? { ...pet, waterLogs: [...pet.waterLogs, { ...logData, id: generateId() }] }
+              : pet
+          ),
+        })),
+
+      addWeightLog: (petId, logData) =>
+        set((state) => ({
+          pets: state.pets.map((pet) =>
+            pet.id === petId
+              ? { ...pet, weightLogs: [...(pet.weightLogs ?? []), { ...logData, id: generateId() }] }
+              : pet
+          ),
+        })),
+
+      deleteWeightLog: (petId, logId) =>
+        set((state) => ({
+          pets: state.pets.map((pet) =>
+            pet.id === petId
+              ? { ...pet, weightLogs: (pet.weightLogs ?? []).filter((l) => l.id !== logId) }
+              : pet
+          ),
+        })),
+
+      addGroomingLog: (petId, logData) =>
+        set((state) => ({
+          pets: state.pets.map((pet) =>
+            pet.id === petId
+              ? { ...pet, groomingLogs: [...(pet.groomingLogs ?? []), { ...logData, id: generateId() }] }
+              : pet
+          ),
+        })),
+
+      deleteGroomingLog: (petId, logId) =>
+        set((state) => ({
+          pets: state.pets.map((pet) =>
+            pet.id === petId
+              ? { ...pet, groomingLogs: (pet.groomingLogs ?? []).filter((l) => l.id !== logId) }
               : pet
           ),
         })),

@@ -2,10 +2,10 @@ export interface HealthEvent {
   id: string;
   type: 'vaccine' | 'vet_visit' | 'medication' | 'deworming';
   title: string;
-  date: string; // ISO 8601 format
-  nextDueDate?: string; // ISO 8601 format
+  date: string;
+  nextDueDate?: string;
   notes?: string;
-  documentUri?: string; // Local URI from ImagePicker
+  documentUri?: string;
 }
 
 export interface FoodLog {
@@ -17,7 +17,27 @@ export interface FoodLog {
 export interface WaterLog {
   id: string;
   date: string;
-  servings: number; // e.g., 1 serving = 250ml
+  servings: number;
+}
+
+export interface WeightLog {
+  id: string;
+  date: string;
+  weightKg: number;
+}
+
+export interface GroomingLog {
+  id: string;
+  date: string;
+  type: 'bath' | 'haircut' | 'nails' | 'ears' | 'teeth' | 'other';
+  notes?: string;
+}
+
+export interface VetInfo {
+  name: string;
+  clinic: string;
+  phone: string;
+  notes: string;
 }
 
 export interface Pet {
@@ -29,7 +49,12 @@ export interface Pet {
   gender: 'male' | 'female';
   weightKg: number;
   avatarUri?: string;
+  foodTargetGrams: number;
+  waterTargetServings: number;
+  vet: VetInfo;
   healthEvents: HealthEvent[];
   foodLogs: FoodLog[];
   waterLogs: WaterLog[];
+  weightLogs: WeightLog[];
+  groomingLogs: GroomingLog[];
 }
