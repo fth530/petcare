@@ -45,11 +45,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
     [language]
   );
 
-  return (
-    <I18nContext.Provider value={{ language, t, setLanguage }}>
-      {children}
-    </I18nContext.Provider>
-  );
+  return React.createElement(I18nContext.Provider, { value: { language, t, setLanguage } }, children);
 };
 
 export const useTranslation = () => useContext(I18nContext);

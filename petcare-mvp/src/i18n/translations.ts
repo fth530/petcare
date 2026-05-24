@@ -4,6 +4,8 @@ export const translations = {
     save: 'Save', cancel: 'Cancel', delete: 'Delete', edit: 'Edit', add: 'Add',
     year: 'yr', month: 'mo', day: 'd',
     close: 'Close', confirm: 'Confirm', back: 'Back', settings: 'Settings',
+    comingSoon: 'Coming Soon', comingSoonMsg: 'This feature is coming in the next update.',
+    total: 'Total', today: 'Today', thisMonth: 'This Month', thisYear: 'This Year',
     // Pets
     myPets: 'My Pets', addPet: 'Add New Pet', editPet: 'Edit Pet',
     petName: 'Pet Name', breed: 'Breed', weight: 'Weight (kg)',
@@ -62,11 +64,53 @@ export const translations = {
     invalidWeight: 'Invalid Weight', invalidWeightMsg: 'Weight must be 0–1000 kg.',
     nameTooLong: 'Name Too Long', nameTooLongMsg: 'Pet name must be 100 characters or fewer.',
     permissionNeeded: 'Permission needed', photoPermissionMsg: 'Please allow photo library access.',
+    // Calendar
+    calendar: 'Calendar', noEventsThisMonth: 'No events this month.',
+    events: 'Events', upcomingEvents: 'Upcoming Events',
+    // Medications
+    medications: 'Medications', addMedication: 'Add Medication',
+    medicationName: 'Medication Name', dosage: 'Dosage', frequency: 'Frequency',
+    startDate: 'Start Date (YYYY-MM-DD)', endDate: 'End Date (optional)',
+    freqDaily: 'Daily', freqWeekly: 'Weekly', freqMonthly: 'Monthly', freqAsNeeded: 'As Needed',
+    logDose: 'Log Dose', doseLogged: 'Dose logged!', lastDose: 'Last dose',
+    noMedications: 'No medications added yet.', deleteMedication: 'Delete Medication',
+    deleteMedicationConfirm: 'Remove this medication?', totalDoses: 'doses given',
+    editMedication: 'Edit Medication',
+    // Activity
+    activities: 'Activities', addActivity: 'Log Activity',
+    activityType: 'Activity Type', duration: 'Duration (minutes)', distance: 'Distance (km, optional)',
+    actWalk: 'Walk', actRun: 'Run', actPlay: 'Play', actSwim: 'Swim',
+    actTraining: 'Training', actOther: 'Other',
+    noActivities: 'No activities logged yet.', totalTime: 'Total Time',
+    totalDistance: 'Total Distance', deleteActivity: 'Delete this activity?',
+    minutes: 'min', km: 'km',
+    // Budget
+    budget: 'Budget', addExpense: 'Add Expense',
+    expenseCategory: 'Category', amount: 'Amount', description: 'Description',
+    catVet: 'Vet', catFood: 'Food', catMedicine: 'Medicine',
+    catGrooming: 'Grooming', catAccessories: 'Accessories', catOther: 'Other',
+    noExpenses: 'No expenses recorded yet.', totalSpent: 'Total Spent',
+    deleteExpense: 'Delete this expense?',
+    // Photo Album
+    photos: 'Photos', addPhoto: 'Add Photo', photoCaption: 'Caption (optional)',
+    noPhotos: 'No photos yet. Add your first memory!',
+    deletePhoto: 'Delete this photo?',
+    // Pet Passport
+    petPassport: 'Pet Passport', passportId: 'Passport ID',
+    ownerInfo: 'Owner Info', medicalHistory: 'Medical History',
+    lastVaccines: 'Last Vaccines', activeMedications: 'Active Medications',
+    exportPassport: 'Export as PDF',
+    // Vet Map
+    vetMap: 'Vet Clinics', vetMapDesc: 'Find nearby veterinary clinics.',
+    // Insurance
+    insurance: 'Insurance', insuranceDesc: 'Manage your pet insurance policies.',
   },
   tr: {
     save: 'Kaydet', cancel: 'İptal', delete: 'Sil', edit: 'Düzenle', add: 'Ekle',
     year: 'yıl', month: 'ay', day: 'gün',
     close: 'Kapat', confirm: 'Onayla', back: 'Geri', settings: 'Ayarlar',
+    comingSoon: 'Yakında', comingSoonMsg: 'Bu özellik yakında gelecek.',
+    total: 'Toplam', today: 'Bugün', thisMonth: 'Bu Ay', thisYear: 'Bu Yıl',
     myPets: 'Evcil Hayvanlarım', addPet: 'Yeni Hayvan Ekle', editPet: 'Hayvanı Düzenle',
     petName: 'Hayvan Adı', breed: 'Cins', weight: 'Ağırlık (kg)',
     dateOfBirth: 'Doğum Tarihi (YYYY-MM-DD)', type: 'Tür',
@@ -114,6 +158,46 @@ export const translations = {
     invalidWeight: 'Geçersiz Ağırlık', invalidWeightMsg: 'Ağırlık 0–1000 kg arasında olmalı.',
     nameTooLong: 'İsim Çok Uzun', nameTooLongMsg: 'Hayvan adı 100 karakter veya daha az olmalı.',
     permissionNeeded: 'İzin Gerekli', photoPermissionMsg: 'Lütfen fotoğraf kitaplığı erişimine izin verin.',
+    // Calendar
+    calendar: 'Takvim', noEventsThisMonth: 'Bu ay etkinlik yok.',
+    events: 'Etkinlikler', upcomingEvents: 'Yaklaşan Etkinlikler',
+    // Medications
+    medications: 'İlaçlar', addMedication: 'İlaç Ekle',
+    medicationName: 'İlaç Adı', dosage: 'Doz', frequency: 'Sıklık',
+    startDate: 'Başlangıç Tarihi (YYYY-MM-DD)', endDate: 'Bitiş Tarihi (isteğe bağlı)',
+    freqDaily: 'Günlük', freqWeekly: 'Haftalık', freqMonthly: 'Aylık', freqAsNeeded: 'Gerektiğinde',
+    logDose: 'Doz Kaydet', doseLogged: 'Doz kaydedildi!', lastDose: 'Son doz',
+    noMedications: 'Henüz ilaç eklenmedi.', deleteMedication: 'İlacı Sil',
+    deleteMedicationConfirm: 'Bu ilacı kaldır?', totalDoses: 'doz verildi',
+    editMedication: 'İlacı Düzenle',
+    // Activity
+    activities: 'Aktiviteler', addActivity: 'Aktivite Ekle',
+    activityType: 'Aktivite Türü', duration: 'Süre (dakika)', distance: 'Mesafe (km, isteğe bağlı)',
+    actWalk: 'Yürüyüş', actRun: 'Koşu', actPlay: 'Oyun', actSwim: 'Yüzme',
+    actTraining: 'Antrenman', actOther: 'Diğer',
+    noActivities: 'Henüz aktivite kaydı yok.', totalTime: 'Toplam Süre',
+    totalDistance: 'Toplam Mesafe', deleteActivity: 'Bu aktiviteyi sil?',
+    minutes: 'dk', km: 'km',
+    // Budget
+    budget: 'Bütçe', addExpense: 'Harcama Ekle',
+    expenseCategory: 'Kategori', amount: 'Tutar', description: 'Açıklama',
+    catVet: 'Veteriner', catFood: 'Yemek', catMedicine: 'İlaç',
+    catGrooming: 'Bakım', catAccessories: 'Aksesuar', catOther: 'Diğer',
+    noExpenses: 'Henüz harcama kaydı yok.', totalSpent: 'Toplam Harcama',
+    deleteExpense: 'Bu harcamayı sil?',
+    // Photo Album
+    photos: 'Fotoğraflar', addPhoto: 'Fotoğraf Ekle', photoCaption: 'Başlık (isteğe bağlı)',
+    noPhotos: 'Henüz fotoğraf yok. İlk anınızı ekleyin!',
+    deletePhoto: 'Bu fotoğrafı sil?',
+    // Pet Passport
+    petPassport: 'Evcil Hayvan Pasaportu', passportId: 'Pasaport No',
+    ownerInfo: 'Sahip Bilgileri', medicalHistory: 'Tıbbi Geçmiş',
+    lastVaccines: 'Son Aşılar', activeMedications: 'Aktif İlaçlar',
+    exportPassport: 'PDF Olarak Dışa Aktar',
+    // Vet Map
+    vetMap: 'Veteriner Klinikleri', vetMapDesc: 'Yakındaki veteriner kliniklerini bulun.',
+    // Insurance
+    insurance: 'Sigorta', insuranceDesc: 'Evcil hayvan sigorta poliçelerinizi yönetin.',
   },
 } as const;
 

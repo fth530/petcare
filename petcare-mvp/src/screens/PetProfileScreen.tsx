@@ -179,32 +179,53 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         </View>
       </Card>
 
-      {/* Quick actions row */}
+      {/* Quick actions row 1 */}
       <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
-        <Pressable style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-          onPress={() => navigation.navigate('WeightHistory', { petId })} accessibilityRole="button">
-          <Ionicons name="trending-up-outline" size={22} color={colors.primary[500]} />
-          <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4 }}>{t('weightHistory')}</Typography>
-        </Pressable>
-        <Pressable style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-          onPress={() => navigation.navigate('Grooming', { petId })} accessibilityRole="button">
-          <Ionicons name="cut-outline" size={22} color={colors.accent[500]} />
-          <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4 }}>
-            {lastGrooming ? `${t('lastGrooming')}: ${format(parseISO(lastGrooming.date), 'MMM d')}` : t('grooming')}
-          </Typography>
-        </Pressable>
-        <Pressable style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-          onPress={() => navigation.navigate('Statistics', { petId })} accessibilityRole="button">
-          <Ionicons name="bar-chart-outline" size={22} color={colors.success} />
-          <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4 }}>{t('stats')}</Typography>
-        </Pressable>
-        {pet.vet?.phone ? (
-          <Pressable style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            onPress={callVet} accessibilityRole="button" accessibilityLabel={t('callVet')}>
-            <Ionicons name="call-outline" size={22} color={colors.success} />
-            <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4 }}>{t('callVet')}</Typography>
+        {[
+          { icon: 'trending-up-outline', color: colors.primary[500], label: t('weightHistory'), screen: 'WeightHistory' },
+          { icon: 'cut-outline', color: colors.accent[500], label: t('grooming'), screen: 'Grooming' },
+          { icon: 'bar-chart-outline', color: colors.success, label: t('stats'), screen: 'Statistics' },
+          { icon: 'calendar-outline', color: colors.warning, label: t('calendar'), screen: 'Calendar' },
+        ].map((item) => (
+          <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={() => navigation.navigate(item.screen as any, { petId })} accessibilityRole="button">
+            <Ionicons name={item.icon as any} size={22} color={item.color} />
+            <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
           </Pressable>
-        ) : null}
+        ))}
+      </View>
+
+      {/* Quick actions row 2 */}
+      <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
+        {[
+          { icon: 'medkit-outline', color: colors.primary[500], label: t('medications'), screen: 'Medications' },
+          { icon: 'walk-outline', color: '#10b981', label: t('activities'), screen: 'ActivityLog' },
+          { icon: 'wallet-outline', color: '#f59e0b', label: t('budget'), screen: 'Budget' },
+          { icon: 'images-outline', color: '#3b82f6', label: t('photos'), screen: 'PhotoAlbum' },
+        ].map((item) => (
+          <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={() => navigation.navigate(item.screen as any, { petId })} accessibilityRole="button">
+            <Ionicons name={item.icon as any} size={22} color={item.color} />
+            <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
+          </Pressable>
+        ))}
+      </View>
+
+      {/* Passport & placeholders row */}
+      <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
+        {[
+          { icon: 'id-card-outline', color: colors.primary[700], label: t('petPassport'), screen: 'PetPassport' },
+          { icon: 'map-outline', color: colors.neutral[300], label: t('vetMap'), screen: 'VetMap', noParam: true },
+          { icon: 'shield-outline', color: colors.neutral[300], label: t('insurance'), screen: 'Insurance', noParam: true },
+          pet.vet?.phone ? { icon: 'call-outline', color: colors.success, label: t('callVet'), screen: 'callVet', isCall: true } : null,
+        ].filter(Boolean).map((item: any) => (
+          <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
+            onPress={item.isCall ? callVet : () => navigation.navigate(item.screen as any, item.noParam ? undefined : { petId })}
+            accessibilityRole="button">
+            <Ionicons name={item.icon as any} size={22} color={item.color} />
+            <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
+          </Pressable>
+        ))}
       </View>
 
       {/* Weight log quick entry */}
@@ -308,7 +329,7 @@ const styles = StyleSheet.create({
   sectionCard: { marginHorizontal: styling.spacing[16], marginBottom: styling.spacing[16] },
   sectionHeader: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', marginBottom: styling.spacing[12] },
   sectionTitle: { fontSize: 17, marginBottom: styling.spacing[12] },
-  nutritionRow: { marginBottom: styling.spacing[14] },
+  nutritionRow: { marginBottom: styling.spacing[12] },
   nutritionInfo: { flexDirection: 'row', justifyContent: 'space-between', marginBottom: 6 },
   nutritionLabel: { fontWeight: '600' },
   progressBar: { height: 8 },

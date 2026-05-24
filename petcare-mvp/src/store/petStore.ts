@@ -1,7 +1,10 @@
 import { create } from 'zustand';
 import { persist, createJSONStorage } from 'zustand/middleware';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { Pet, HealthEvent, FoodLog, WaterLog, WeightLog, GroomingLog } from '../types/PetCare';
+import {
+  Pet, HealthEvent, FoodLog, WaterLog, WeightLog, GroomingLog,
+  Medication, MedicationDoseLog, ActivityLog, Expense, Photo,
+} from '../types/PetCare';
 import { FOOD_TARGET_GRAMS, WATER_TARGET_SERVINGS } from '../constants';
 
 interface PetStore {
@@ -11,7 +14,7 @@ interface PetStore {
 
   setHasHydrated: (value: boolean) => void;
 
-  addPet: (pet: Omit<Pet, 'id' | 'healthEvents' | 'foodLogs' | 'waterLogs' | 'weightLogs' | 'groomingLogs'>) => void;
+  addPet: (pet: Omit<Pet, 'id' | 'healthEvents' | 'foodLogs' | 'waterLogs' | 'weightLogs' | 'groomingLogs' | 'medications' | 'activityLogs' | 'expenses' | 'photos'>) => void;
   updatePet: (petId: string, updates: Partial<Pet>) => void;
   deletePet: (petId: string) => void;
 
@@ -27,6 +30,20 @@ interface PetStore {
 
   addGroomingLog: (petId: string, log: Omit<GroomingLog, 'id'>) => void;
   deleteGroomingLog: (petId: string, logId: string) => void;
+
+  addMedication: (petId: string, med: Omit<Medication, 'id' | 'logs'>) => void;
+  updateMedication: (petId: string, medId: string, updates: Partial<Omit<Medication, 'id' | 'logs'>>) => void;
+  deleteMedication: (petId: string, medId: string) => void;
+  logMedicationDose: (petId: string, medId: string) => void;
+
+  addActivityLog: (petId: string, log: Omit<ActivityLog, 'id'>) => void;
+  deleteActivityLog: (petId: string, logId: string) => void;
+
+  addExpense: (petId: string, expense: Omit<Expense, 'id'>) => void;
+  deleteExpense: (petId: string, expenseId: string) => void;
+
+  addPhoto: (petId: string, photo: Omit<Photo, 'id'>) => void;
+  deletePhoto: (petId: string, photoId: string) => void;
 
   loadMockDataIfEmpty: () => void;
 }
@@ -75,10 +92,38 @@ const mockPet: Pet = {
     { id: 'g-1', date: new Date(Date.now() - 14 * 86400000).toISOString(), type: 'bath' },
     { id: 'g-2', date: new Date(Date.now() - 7 * 86400000).toISOString(), type: 'nails' },
   ],
+  medications: [
+    {
+      id: 'med-1',
+      name: 'Heartgard Plus',
+      dosage: '1 chewable',
+      frequency: 'monthly',
+      startDate: new Date(Date.now() - 90 * 86400000).toISOString(),
+      notes: 'Give with food',
+      logs: [
+        { id: 'dose-1', date: new Date(Date.now() - 60 * 86400000).toISOString() },
+        { id: 'dose-2', date: new Date(Date.now() - 30 * 86400000).toISOString() },
+      ],
+    },
+  ],
+  activityLogs: [
+    { id: 'act-1', date: new Date(Date.now() - 2 * 86400000).toISOString(), type: 'walk', durationMinutes: 30, distanceKm: 2.5 },
+    { id: 'act-2', date: new Date(Date.now() - 1 * 86400000).toISOString(), type: 'play', durationMinutes: 20 },
+    { id: 'act-3', date: new Date().toISOString(), type: 'walk', durationMinutes: 45, distanceKm: 3.2 },
+  ],
+  expenses: [
+    { id: 'exp-1', date: new Date(Date.now() - 30 * 86400000).toISOString(), category: 'vet', amount: 120, description: 'Annual Checkup' },
+    { id: 'exp-2', date: new Date(Date.now() - 15 * 86400000).toISOString(), category: 'food', amount: 45, description: 'Dry food 10kg' },
+    { id: 'exp-3', date: new Date(Date.now() - 7 * 86400000).toISOString(), category: 'medicine', amount: 28, description: 'Heartgard Plus' },
+  ],
+  photos: [],
 };
 
 const generateId = () =>
   `${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 8)}`;
+
+const patchPet = (pets: Pet[], petId: string, fn: (pet: Pet) => Partial<Pet>): Pet[] =>
+  pets.map((p) => (p.id === petId ? { ...p, ...fn(p) } : p));
 
 export const usePetStore = create<PetStore>()(
   persist(
@@ -107,106 +152,157 @@ export const usePetStore = create<PetStore>()(
               waterLogs: [],
               weightLogs: [],
               groomingLogs: [],
+              medications: [],
+              activityLogs: [],
+              expenses: [],
+              photos: [],
             },
           ],
         })),
 
       updatePet: (petId, updates) =>
-        set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId ? { ...pet, ...updates } : pet
-          ),
-        })),
+        set((state) => ({ pets: patchPet(state.pets, petId, () => updates) })),
 
       deletePet: (petId) =>
-        set((state) => ({
-          pets: state.pets.filter((pet) => pet.id !== petId),
-        })),
+        set((state) => ({ pets: state.pets.filter((pet) => pet.id !== petId) })),
 
       addHealthEvent: (petId, eventData) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, healthEvents: [...pet.healthEvents, { ...eventData, id: generateId() }] }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            healthEvents: [...p.healthEvents, { ...eventData, id: generateId() }],
+          })),
         })),
 
       updateHealthEvent: (petId, eventId, updates) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? {
-                  ...pet,
-                  healthEvents: pet.healthEvents.map((e) =>
-                    e.id === eventId ? { ...e, ...updates } : e
-                  ),
-                }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            healthEvents: p.healthEvents.map((e) => (e.id === eventId ? { ...e, ...updates } : e)),
+          })),
         })),
 
       deleteHealthEvent: (petId, eventId) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, healthEvents: pet.healthEvents.filter((e) => e.id !== eventId) }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            healthEvents: p.healthEvents.filter((e) => e.id !== eventId),
+          })),
         })),
 
       addFoodLog: (petId, logData) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, foodLogs: [...pet.foodLogs, { ...logData, id: generateId() }] }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            foodLogs: [...p.foodLogs, { ...logData, id: generateId() }],
+          })),
         })),
 
       addWaterLog: (petId, logData) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, waterLogs: [...pet.waterLogs, { ...logData, id: generateId() }] }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            waterLogs: [...p.waterLogs, { ...logData, id: generateId() }],
+          })),
         })),
 
       addWeightLog: (petId, logData) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, weightLogs: [...(pet.weightLogs ?? []), { ...logData, id: generateId() }] }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            weightLogs: [...(p.weightLogs ?? []), { ...logData, id: generateId() }],
+          })),
         })),
 
       deleteWeightLog: (petId, logId) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, weightLogs: (pet.weightLogs ?? []).filter((l) => l.id !== logId) }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            weightLogs: (p.weightLogs ?? []).filter((l) => l.id !== logId),
+          })),
         })),
 
       addGroomingLog: (petId, logData) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, groomingLogs: [...(pet.groomingLogs ?? []), { ...logData, id: generateId() }] }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            groomingLogs: [...(p.groomingLogs ?? []), { ...logData, id: generateId() }],
+          })),
         })),
 
       deleteGroomingLog: (petId, logId) =>
         set((state) => ({
-          pets: state.pets.map((pet) =>
-            pet.id === petId
-              ? { ...pet, groomingLogs: (pet.groomingLogs ?? []).filter((l) => l.id !== logId) }
-              : pet
-          ),
+          pets: patchPet(state.pets, petId, (p) => ({
+            groomingLogs: (p.groomingLogs ?? []).filter((l) => l.id !== logId),
+          })),
+        })),
+
+      addMedication: (petId, medData) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            medications: [...(p.medications ?? []), { ...medData, id: generateId(), logs: [] }],
+          })),
+        })),
+
+      updateMedication: (petId, medId, updates) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            medications: (p.medications ?? []).map((m) =>
+              m.id === medId ? { ...m, ...updates } : m
+            ),
+          })),
+        })),
+
+      deleteMedication: (petId, medId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            medications: (p.medications ?? []).filter((m) => m.id !== medId),
+          })),
+        })),
+
+      logMedicationDose: (petId, medId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            medications: (p.medications ?? []).map((m) =>
+              m.id === medId
+                ? { ...m, logs: [...m.logs, { id: generateId(), date: new Date().toISOString() }] }
+                : m
+            ),
+          })),
+        })),
+
+      addActivityLog: (petId, logData) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            activityLogs: [...(p.activityLogs ?? []), { ...logData, id: generateId() }],
+          })),
+        })),
+
+      deleteActivityLog: (petId, logId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            activityLogs: (p.activityLogs ?? []).filter((l) => l.id !== logId),
+          })),
+        })),
+
+      addExpense: (petId, expenseData) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            expenses: [...(p.expenses ?? []), { ...expenseData, id: generateId() }],
+          })),
+        })),
+
+      deleteExpense: (petId, expenseId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            expenses: (p.expenses ?? []).filter((e) => e.id !== expenseId),
+          })),
+        })),
+
+      addPhoto: (petId, photoData) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            photos: [...(p.photos ?? []), { ...photoData, id: generateId() }],
+          })),
+        })),
+
+      deletePhoto: (petId, photoId) =>
+        set((state) => ({
+          pets: patchPet(state.pets, petId, (p) => ({
+            photos: (p.photos ?? []).filter((ph) => ph.id !== photoId),
+          })),
         })),
     }),
     {

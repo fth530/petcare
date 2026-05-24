@@ -40,6 +40,47 @@ export interface VetInfo {
   notes: string;
 }
 
+export interface MedicationDoseLog {
+  id: string;
+  date: string;
+}
+
+export interface Medication {
+  id: string;
+  name: string;
+  dosage: string;
+  frequency: 'daily' | 'weekly' | 'monthly' | 'as_needed';
+  startDate: string;
+  endDate?: string;
+  notes?: string;
+  logs: MedicationDoseLog[];
+}
+
+export interface ActivityLog {
+  id: string;
+  date: string;
+  type: 'walk' | 'run' | 'play' | 'swim' | 'training' | 'other';
+  durationMinutes: number;
+  distanceKm?: number;
+  notes?: string;
+}
+
+export interface Expense {
+  id: string;
+  date: string;
+  category: 'vet' | 'food' | 'medicine' | 'grooming' | 'accessories' | 'other';
+  amount: number;
+  description: string;
+  notes?: string;
+}
+
+export interface Photo {
+  id: string;
+  date: string;
+  uri: string;
+  caption?: string;
+}
+
 export interface Pet {
   id: string;
   name: string;
@@ -57,4 +98,8 @@ export interface Pet {
   waterLogs: WaterLog[];
   weightLogs: WeightLog[];
   groomingLogs: GroomingLog[];
+  medications: Medication[];
+  activityLogs: ActivityLog[];
+  expenses: Expense[];
+  photos: Photo[];
 }

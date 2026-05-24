@@ -9,6 +9,14 @@ import { WeightHistoryScreen } from '../screens/WeightHistoryScreen';
 import { StatisticsScreen } from '../screens/StatisticsScreen';
 import { GroomingScreen } from '../screens/GroomingScreen';
 import { SettingsScreen } from '../screens/SettingsScreen';
+import { CalendarScreen } from '../screens/CalendarScreen';
+import { MedicationsScreen } from '../screens/MedicationsScreen';
+import { ActivityLogScreen } from '../screens/ActivityLogScreen';
+import { BudgetScreen } from '../screens/BudgetScreen';
+import { PhotoAlbumScreen } from '../screens/PhotoAlbumScreen';
+import { PetPassportScreen } from '../screens/PetPassportScreen';
+import { VetMapScreen } from '../screens/VetMapScreen';
+import { InsuranceScreen } from '../screens/InsuranceScreen';
 import { useTheme } from '../context/ThemeContext';
 
 export type RootStackParamList = {
@@ -20,6 +28,14 @@ export type RootStackParamList = {
   Statistics: { petId: string };
   Grooming: { petId: string };
   Settings: undefined;
+  Calendar: { petId: string };
+  Medications: { petId: string };
+  ActivityLog: { petId: string };
+  Budget: { petId: string };
+  PhotoAlbum: { petId: string };
+  PetPassport: { petId: string };
+  VetMap: undefined;
+  Insurance: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -36,7 +52,7 @@ const linking = {
 };
 
 export const RootNavigator = () => {
-  const { colors, isDark } = useTheme();
+  const { colors } = useTheme();
   return (
     <NavigationContainer linking={linking}>
       <Stack.Navigator
@@ -65,6 +81,14 @@ export const RootNavigator = () => {
         <Stack.Screen name="Statistics" component={StatisticsScreen} options={{ title: 'Statistics' }} />
         <Stack.Screen name="Grooming" component={GroomingScreen} options={{ title: 'Grooming Log' }} />
         <Stack.Screen name="Settings" component={SettingsScreen} options={{ title: 'Settings' }} />
+        <Stack.Screen name="Calendar" component={CalendarScreen} options={{ title: 'Health Calendar' }} />
+        <Stack.Screen name="Medications" component={MedicationsScreen} options={{ title: 'Medications' }} />
+        <Stack.Screen name="ActivityLog" component={ActivityLogScreen} options={{ title: 'Activity Log' }} />
+        <Stack.Screen name="Budget" component={BudgetScreen} options={{ title: 'Budget Tracker' }} />
+        <Stack.Screen name="PhotoAlbum" component={PhotoAlbumScreen} options={{ title: 'Photo Album' }} />
+        <Stack.Screen name="PetPassport" component={PetPassportScreen} options={{ title: 'Pet Passport' }} />
+        <Stack.Screen name="VetMap" component={VetMapScreen} options={{ title: 'Vet Clinics' }} />
+        <Stack.Screen name="Insurance" component={InsuranceScreen} options={{ title: 'Insurance' }} />
       </Stack.Navigator>
     </NavigationContainer>
   );

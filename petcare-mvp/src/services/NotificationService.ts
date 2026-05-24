@@ -14,10 +14,10 @@ Notifications.setNotificationHandler({
 });
 
 export async function requestNotificationPermission(): Promise<boolean> {
-  const { status: existing } = await Notifications.getPermissionsAsync();
-  if (existing === 'granted') return true;
-  const { status } = await Notifications.requestPermissionsAsync();
-  return status === 'granted';
+  const existing = (await Notifications.getPermissionsAsync()) as unknown as { granted: boolean; status: string };
+  if (existing.granted || existing.status === 'granted') return true;
+  const newPerm = (await Notifications.requestPermissionsAsync()) as unknown as { granted: boolean; status: string };
+  return newPerm.granted || newPerm.status === 'granted';
 }
 
 export async function scheduleVaccineReminders(pets: Pet[]): Promise<void> {

@@ -1,6 +1,18 @@
 import { act } from 'react';
 import { usePetStore } from '../store/petStore';
 
+const DEFAULT_VET = { name: '', clinic: '', phone: '', notes: '' };
+const BASE_PET = {
+  type: 'dog' as const,
+  breed: '',
+  dateOfBirth: '',
+  gender: 'male' as const,
+  weightKg: 0,
+  foodTargetGrams: 300,
+  waterTargetServings: 4,
+  vet: DEFAULT_VET,
+};
+
 // Reset store between tests
 beforeEach(() => {
   usePetStore.setState({ pets: [], hasHydrated: true, isLoading: false });
@@ -11,14 +23,7 @@ describe('petStore', () => {
     it('adds a pet with generated id and empty logs', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({
-          name: 'Buddy',
-          type: 'dog',
-          breed: 'Labrador',
-          dateOfBirth: '2022-01-01T00:00:00.000Z',
-          gender: 'male',
-          weightKg: 20,
-        });
+        addPet({ ...BASE_PET, name: 'Buddy' });
       });
       const pets = usePetStore.getState().pets;
       expect(pets).toHaveLength(1);
@@ -27,14 +32,15 @@ describe('petStore', () => {
       expect(pets[0].healthEvents).toEqual([]);
       expect(pets[0].foodLogs).toEqual([]);
       expect(pets[0].waterLogs).toEqual([]);
+      expect(pets[0].medications).toEqual([]);
+      expect(pets[0].activityLogs).toEqual([]);
     });
 
     it('generates unique ids for each pet', () => {
       const { addPet } = usePetStore.getState();
-      const base = { type: 'dog' as const, breed: '', dateOfBirth: '', gender: 'male' as const, weightKg: 0 };
       act(() => {
-        addPet({ ...base, name: 'Pet1' });
-        addPet({ ...base, name: 'Pet2' });
+        addPet({ ...BASE_PET, name: 'Pet1' });
+        addPet({ ...BASE_PET, name: 'Pet2' });
       });
       const pets = usePetStore.getState().pets;
       expect(pets[0].id).not.toBe(pets[1].id);
@@ -44,7 +50,7 @@ describe('petStore', () => {
   describe('updatePet', () => {
     it('updates only the matching pet', () => {
       const { addPet } = usePetStore.getState();
-      const base = { type: 'cat' as const, breed: '', dateOfBirth: '', gender: 'female' as const, weightKg: 4 };
+      const base = { ...BASE_PET, type: 'cat' as const, gender: 'female' as const, weightKg: 4 };
       act(() => {
         addPet({ ...base, name: 'Whiskers' });
         addPet({ ...base, name: 'Luna' });
@@ -62,10 +68,9 @@ describe('petStore', () => {
   describe('deletePet', () => {
     it('removes the correct pet', () => {
       const { addPet } = usePetStore.getState();
-      const base = { type: 'dog' as const, breed: '', dateOfBirth: '', gender: 'male' as const, weightKg: 10 };
       act(() => {
-        addPet({ ...base, name: 'Rex' });
-        addPet({ ...base, name: 'Max' });
+        addPet({ ...BASE_PET, name: 'Rex' });
+        addPet({ ...BASE_PET, name: 'Max' });
       });
       const [pet1] = usePetStore.getState().pets;
       act(() => {
@@ -81,7 +86,7 @@ describe('petStore', () => {
     it('adds event to correct pet', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({ name: 'Dog', type: 'dog', breed: '', dateOfBirth: '', gender: 'male', weightKg: 0 });
+        addPet({ ...BASE_PET, name: 'Dog' });
       });
       const [pet] = usePetStore.getState().pets;
       act(() => {
@@ -102,7 +107,7 @@ describe('petStore', () => {
     it('updates the correct event', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({ name: 'Cat', type: 'cat', breed: '', dateOfBirth: '', gender: 'female', weightKg: 0 });
+        addPet({ ...BASE_PET, name: 'Cat', type: 'cat', gender: 'female' });
       });
       const [pet] = usePetStore.getState().pets;
       act(() => {
@@ -121,7 +126,7 @@ describe('petStore', () => {
     it('removes event from correct pet', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({ name: 'Dog', type: 'dog', breed: '', dateOfBirth: '', gender: 'male', weightKg: 0 });
+        addPet({ ...BASE_PET, name: 'Dog' });
       });
       const [pet] = usePetStore.getState().pets;
       act(() => {
@@ -139,7 +144,7 @@ describe('petStore', () => {
     it('appends food log with generated id', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({ name: 'Dog', type: 'dog', breed: '', dateOfBirth: '', gender: 'male', weightKg: 0 });
+        addPet({ ...BASE_PET, name: 'Dog' });
       });
       const [pet] = usePetStore.getState().pets;
       act(() => {
@@ -156,7 +161,7 @@ describe('petStore', () => {
     it('appends water log with generated id', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({ name: 'Dog', type: 'dog', breed: '', dateOfBirth: '', gender: 'male', weightKg: 0 });
+        addPet({ ...BASE_PET, name: 'Dog' });
       });
       const [pet] = usePetStore.getState().pets;
       act(() => {
@@ -165,6 +170,42 @@ describe('petStore', () => {
       const logs = usePetStore.getState().pets.find((p) => p.id === pet.id)!.waterLogs;
       expect(logs).toHaveLength(1);
       expect(logs[0].servings).toBe(2);
+    });
+  });
+
+  describe('medications', () => {
+    it('adds and logs dose for a medication', () => {
+      const { addPet } = usePetStore.getState();
+      act(() => { addPet({ ...BASE_PET, name: 'Dog' }); });
+      const [pet] = usePetStore.getState().pets;
+      act(() => {
+        usePetStore.getState().addMedication(pet.id, {
+          name: 'Heartgard', dosage: '1 chewable', frequency: 'monthly',
+          startDate: new Date().toISOString(),
+        });
+      });
+      const meds = usePetStore.getState().pets.find((p) => p.id === pet.id)!.medications;
+      expect(meds).toHaveLength(1);
+      act(() => { usePetStore.getState().logMedicationDose(pet.id, meds[0].id); });
+      const updated = usePetStore.getState().pets.find((p) => p.id === pet.id)!.medications[0];
+      expect(updated.logs).toHaveLength(1);
+    });
+  });
+
+  describe('activityLogs', () => {
+    it('adds and deletes activity logs', () => {
+      const { addPet } = usePetStore.getState();
+      act(() => { addPet({ ...BASE_PET, name: 'Dog' }); });
+      const [pet] = usePetStore.getState().pets;
+      act(() => {
+        usePetStore.getState().addActivityLog(pet.id, {
+          date: new Date().toISOString(), type: 'walk', durationMinutes: 30,
+        });
+      });
+      const logs = usePetStore.getState().pets.find((p) => p.id === pet.id)!.activityLogs;
+      expect(logs).toHaveLength(1);
+      act(() => { usePetStore.getState().deleteActivityLog(pet.id, logs[0].id); });
+      expect(usePetStore.getState().pets.find((p) => p.id === pet.id)!.activityLogs).toHaveLength(0);
     });
   });
 
@@ -179,7 +220,7 @@ describe('petStore', () => {
     it('does not overwrite existing pets', () => {
       const { addPet } = usePetStore.getState();
       act(() => {
-        addPet({ name: 'Existing', type: 'dog', breed: '', dateOfBirth: '', gender: 'male', weightKg: 0 });
+        addPet({ ...BASE_PET, name: 'Existing' });
         usePetStore.getState().loadMockDataIfEmpty();
       });
       expect(usePetStore.getState().pets).toHaveLength(1);

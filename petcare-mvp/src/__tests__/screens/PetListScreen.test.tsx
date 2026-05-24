@@ -15,6 +15,9 @@ const navigation = {
 
 const route = {} as any;
 
+const DEFAULT_VET = { name: '', clinic: '', phone: '', notes: '' };
+const BASE = { type: 'dog' as const, breed: 'Lab', dateOfBirth: '', gender: 'male' as const, weightKg: 10, foodTargetGrams: 300, waterTargetServings: 4, vet: DEFAULT_VET };
+
 beforeEach(() => {
   usePetStore.setState({ pets: [], hasHydrated: true, isLoading: false });
   jest.clearAllMocks();
@@ -32,11 +35,11 @@ describe('PetListScreen', () => {
   it('shows pet list when pets exist', () => {
     act(() => {
       usePetStore.getState().addPet({
+        ...BASE,
         name: 'Max',
         type: 'dog',
         breed: 'Golden Retriever',
         dateOfBirth: '2021-01-01T00:00:00.000Z',
-        gender: 'male',
         weightKg: 30,
       });
     });
@@ -58,6 +61,7 @@ describe('PetListScreen', () => {
   it('navigates to PetProfile when a pet is pressed', () => {
     act(() => {
       usePetStore.getState().addPet({
+        ...BASE,
         name: 'Luna',
         type: 'cat',
         breed: 'Siamese',
@@ -76,10 +80,9 @@ describe('PetListScreen', () => {
 
   it('renders multiple pets', () => {
     act(() => {
-      const base = { type: 'dog' as const, breed: 'Lab', dateOfBirth: '', gender: 'male' as const, weightKg: 10 };
-      usePetStore.getState().addPet({ ...base, name: 'Buddy' });
-      usePetStore.getState().addPet({ ...base, name: 'Rex' });
-      usePetStore.getState().addPet({ ...base, name: 'Coco' });
+      usePetStore.getState().addPet({ ...BASE, name: 'Buddy' });
+      usePetStore.getState().addPet({ ...BASE, name: 'Rex' });
+      usePetStore.getState().addPet({ ...BASE, name: 'Coco' });
     });
     const { getByText } = render(
       <PetListScreen navigation={navigation} route={route} />

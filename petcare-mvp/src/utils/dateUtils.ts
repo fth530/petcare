@@ -1,4 +1,5 @@
 import { differenceInYears, differenceInMonths, differenceInDays, parseISO } from 'date-fns';
+import type { TranslationKey } from '../i18n/translations';
 
 export function calculateAge(dateOfBirth: string): { years: number; months: number; days: number } {
   const dob = parseISO(dateOfBirth);
@@ -9,7 +10,7 @@ export function calculateAge(dateOfBirth: string): { years: number; months: numb
   return { years, months, days };
 }
 
-export function formatAge(dateOfBirth: string, t: (key: string) => string): string {
+export function formatAge(dateOfBirth: string, t: (key: TranslationKey) => string): string {
   const { years, months, days } = calculateAge(dateOfBirth);
   if (years > 0) {
     return months > 0

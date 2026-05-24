@@ -19,6 +19,8 @@ beforeEach(() => {
   jest.clearAllMocks();
 });
 
+const DEFAULT_VET = { name: '', clinic: '', phone: '', notes: '' };
+
 const addTestPet = () => {
   act(() => {
     usePetStore.getState().addPet({
@@ -28,6 +30,9 @@ const addTestPet = () => {
       dateOfBirth: '2021-01-01T00:00:00.000Z',
       gender: 'male',
       weightKg: 32,
+      foodTargetGrams: 300,
+      waterTargetServings: 4,
+      vet: DEFAULT_VET,
     });
   });
   return usePetStore.getState().pets[0];
