@@ -117,7 +117,7 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
             <Ionicons name="camera" size={20} color="#fff" />
           </View>
         </Pressable>
-        <Typography variant="caption" style={{ marginTop: 8, color: colors.subtext }}>Tap to change photo</Typography>
+        <Typography variant="caption" style={{ marginTop: 8, color: colors.subtext }}>{t('tapToChangePhoto')}</Typography>
       </View>
 
       <View style={styles.form}>
@@ -154,7 +154,7 @@ export const AddEditPetScreen: React.FC<Props> = ({ route, navigation }) => {
         <TextInput label={t('dateOfBirth')} value={dobStr} onChangeText={setDobStr} placeholder="e.g., 2021-05-10" autoCapitalize="none" autoCorrect={false} />
 
         {/* Nutrition targets */}
-        <Typography variant="heading" style={[styles.sectionHeader, { color: colors.text }]}>Nutrition Targets</Typography>
+        <Typography variant="heading" style={[styles.sectionHeader, { color: colors.text }]}>{t('nutritionTargets')}</Typography>
         <TextInput label={t('foodTarget')} value={foodTarget} onChangeText={setFoodTarget} keyboardType="numeric" placeholder="300" />
         <TextInput label={t('waterTarget')} value={waterTarget} onChangeText={setWaterTarget} keyboardType="numeric" placeholder="4" />
 

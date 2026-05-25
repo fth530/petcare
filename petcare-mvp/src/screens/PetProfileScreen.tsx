@@ -188,7 +188,8 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
           { icon: 'calendar-outline', color: colors.warning, label: t('calendar'), screen: 'Calendar' },
         ].map((item) => (
           <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            onPress={() => navigation.navigate(item.screen as any, { petId })} accessibilityRole="button">
+            onPress={() => navigation.navigate(item.screen as any, { petId })}
+            accessibilityRole="button" accessibilityLabel={item.label}>
             <Ionicons name={item.icon as any} size={22} color={item.color} />
             <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
           </Pressable>
@@ -199,12 +200,13 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
       <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
         {[
           { icon: 'medkit-outline', color: colors.primary[500], label: t('medications'), screen: 'Medications' },
-          { icon: 'walk-outline', color: '#10b981', label: t('activities'), screen: 'ActivityLog' },
-          { icon: 'wallet-outline', color: '#f59e0b', label: t('budget'), screen: 'Budget' },
-          { icon: 'images-outline', color: '#3b82f6', label: t('photos'), screen: 'PhotoAlbum' },
+          { icon: 'walk-outline', color: colors.success, label: t('activities'), screen: 'ActivityLog' },
+          { icon: 'wallet-outline', color: colors.warning, label: t('budget'), screen: 'Budget' },
+          { icon: 'images-outline', color: colors.primary[500], label: t('photos'), screen: 'PhotoAlbum' },
         ].map((item) => (
           <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
-            onPress={() => navigation.navigate(item.screen as any, { petId })} accessibilityRole="button">
+            onPress={() => navigation.navigate(item.screen as any, { petId })}
+            accessibilityRole="button" accessibilityLabel={item.label}>
             <Ionicons name={item.icon as any} size={22} color={item.color} />
             <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
           </Pressable>
@@ -215,13 +217,13 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
       <View style={[styles.quickRow, { paddingHorizontal: styling.spacing[16] }]}>
         {[
           { icon: 'id-card-outline', color: colors.primary[700], label: t('petPassport'), screen: 'PetPassport' },
-          { icon: 'checkmark-circle-outline', color: '#6366f1', label: t('careSchedule'), screen: 'CareSchedule' },
-          { icon: 'nutrition-outline', color: '#10b981', label: t('nutritionAnalysis'), screen: 'Nutrition' },
-          { icon: 'sparkles-outline', color: '#f59e0b', label: t('aiAdvice'), screen: 'AIAdvice' },
+          { icon: 'checkmark-circle-outline', color: colors.primary[700], label: t('careSchedule'), screen: 'CareSchedule' },
+          { icon: 'nutrition-outline', color: colors.success, label: t('nutritionAnalysis'), screen: 'Nutrition' },
+          { icon: 'sparkles-outline', color: colors.warning, label: t('aiAdvice'), screen: 'AIAdvice' },
         ].map((item) => (
           <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={() => navigation.navigate(item.screen as any, { petId })}
-            accessibilityRole="button">
+            accessibilityRole="button" accessibilityLabel={item.label}>
             <Ionicons name={item.icon as any} size={22} color={item.color} />
             <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
           </Pressable>
@@ -238,7 +240,7 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         ].filter(Boolean).map((item: any) => (
           <Pressable key={item.screen} style={[styles.quickBtn, { backgroundColor: colors.card, borderColor: colors.border }]}
             onPress={item.isCall ? callVet : () => navigation.navigate(item.screen as any, item.noParam ? undefined : { petId })}
-            accessibilityRole="button">
+            accessibilityRole="button" accessibilityLabel={item.label}>
             <Ionicons name={item.icon as any} size={22} color={item.color} />
             <Typography variant="caption" style={{ color: colors.subtext, marginTop: 4, textAlign: 'center' }}>{item.label}</Typography>
           </Pressable>
@@ -250,7 +252,7 @@ export const PetProfileScreen: React.FC<Props> = ({ route, navigation }) => {
         <View style={styles.sectionHeader}>
           <Typography variant="heading" style={[styles.sectionTitle, { color: colors.text }]}>{t('weightHistory')}</Typography>
           <Pressable onPress={() => navigation.navigate('WeightHistory', { petId })} accessibilityRole="button">
-            <Typography style={{ color: colors.accent[500], fontSize: 13 }}>View all</Typography>
+            <Typography style={{ color: colors.accent[500], fontSize: 13 }}>{t('viewAll')}</Typography>
           </Pressable>
         </View>
         <Button title={t('logWeightBtn')} variant="secondary" onPress={() => setWeightModalVisible(true)} accessibilityLabel={t('weightLog')} />

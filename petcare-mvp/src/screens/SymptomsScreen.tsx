@@ -116,10 +116,10 @@ export const SymptomsScreen: React.FC<Props> = ({ route }) => {
         <Card style={[styles.aiCard, { backgroundColor: colors.primary[100], borderColor: colors.primary[500] }]}>
           <View style={styles.aiHeader}>
             <Ionicons name="sparkles-outline" size={20} color={colors.primary[500]} />
-            <Typography style={{ fontWeight: '700', color: colors.primary[700], marginLeft: 8 }}>AI Analysis</Typography>
+            <Typography style={{ fontWeight: '700', color: colors.primary[700], marginLeft: 8 }}>{t('aiAnalysis')}</Typography>
           </View>
           <Typography style={{ color: colors.primary[700], marginTop: 6, lineHeight: 20 }}>
-            No concerning patterns detected in the last 30 days.
+            {t('noConcerningPatterns')}
           </Typography>
           <Typography variant="caption" style={{ color: colors.subtext, marginTop: 6 }}>
             {t('aiSymptomNote')}

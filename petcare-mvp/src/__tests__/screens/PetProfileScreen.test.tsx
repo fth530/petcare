@@ -88,7 +88,7 @@ describe('PetProfileScreen', () => {
       <PetProfileScreen navigation={navigation} route={route} />
     );
     fireEvent.press(getByText('+ Food'));
-    fireEvent.changeText(getByPlaceholderText('Amount in grams (e.g., 150)'), '200');
+    fireEvent.changeText(getByPlaceholderText('e.g., 150'), '200');
     fireEvent.press(getByText('Save'));
     const updatedPet = usePetStore.getState().pets.find((p) => p.id === pet.id)!;
     expect(updatedPet.foodLogs.length).toBeGreaterThan(0);
@@ -103,7 +103,7 @@ describe('PetProfileScreen', () => {
       <PetProfileScreen navigation={navigation} route={route} />
     );
     fireEvent.press(getByText('+ Food'));
-    fireEvent.changeText(getByPlaceholderText('Amount in grams (e.g., 150)'), '0');
+    fireEvent.changeText(getByPlaceholderText('e.g., 150'), '0');
     fireEvent.press(getByText('Save'));
     const updatedPet = usePetStore.getState().pets.find((p) => p.id === pet.id)!;
     expect(updatedPet.foodLogs).toHaveLength(0);
@@ -117,7 +117,7 @@ describe('PetProfileScreen', () => {
       <PetProfileScreen navigation={navigation} route={route} />
     );
     fireEvent.press(getByText('+ Food'));
-    fireEvent.changeText(getByPlaceholderText('Amount in grams (e.g., 150)'), '99999');
+    fireEvent.changeText(getByPlaceholderText('e.g., 150'), '99999');
     fireEvent.press(getByText('Save'));
     const updatedPet = usePetStore.getState().pets.find((p) => p.id === pet.id)!;
     expect(updatedPet.foodLogs).toHaveLength(0);

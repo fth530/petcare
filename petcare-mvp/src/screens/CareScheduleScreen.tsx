@@ -1,9 +1,11 @@
-import React, { useState, useMemo, useCallback } from 'react';
+import React, { useState, useMemo, useCallback, ComponentProps } from 'react';
 import {
   View, StyleSheet, ScrollView, Pressable, Modal, Alert, TextInput as RNTextInput,
 } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+
+type IoniconsName = ComponentProps<typeof Ionicons>['name'];
 import { parseISO, differenceInDays, addDays, format } from 'date-fns';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -90,9 +92,9 @@ export const CareScheduleScreen: React.FC<Props> = ({ route }) => {
 
   const typeLabel = (type: CareTask['type']): string => {
     const labels: Record<CareTask['type'], string> = {
-      bath: 'Bath', nails: 'Nails', dental: 'Dental',
-      deworming: 'Deworming', flea_treatment: 'Flea Treatment',
-      ear_clean: 'Ear Clean', other: 'Other',
+      bath: t('bath'), nails: t('nails'), dental: t('dental'),
+      deworming: t('deworming'), flea_treatment: t('fleaTreatment'),
+      ear_clean: t('earClean'), other: t('other'),
     };
     return labels[type];
   };
@@ -111,7 +113,7 @@ export const CareScheduleScreen: React.FC<Props> = ({ route }) => {
           tasksWithStatus.map((task) => {
             const statusColor = task.isOverdue ? colors.error : task.daysUntilDue <= 2 ? colors.warning : colors.success;
             const statusLabel = task.isOverdue
-              ? (task.dueDate === null ? 'Never done — Due now' : `${Math.abs(task.daysUntilDue)} ${t('daysAgo')} — ${t('careOverdue')}`)
+              ? (task.dueDate === null ? t('neverDone') : `${Math.abs(task.daysUntilDue)} ${t('daysAgo')} — ${t('careOverdue')}`)
               : task.daysUntilDue === 0
               ? t('careDue')
               : `${task.daysUntilDue} ${t('daysLeft')}`;
@@ -121,7 +123,7 @@ export const CareScheduleScreen: React.FC<Props> = ({ route }) => {
                 <View style={styles.taskHeader}>
                   <View style={styles.taskLeft}>
                     <View style={[styles.iconCircle, { backgroundColor: colors.primary[100] }]}>
-                      <Ionicons name={CARE_ICONS[task.type] as any} size={20} color={colors.primary[500]} />
+                      <Ionicons name={CARE_ICONS[task.type] as IoniconsName} size={20} color={colors.primary[500]} />
                     </View>
                     <View style={styles.taskInfo}>
                       <Typography style={{ fontWeight: '600', color: colors.text }}>{task.name}</Typography>
@@ -136,7 +138,7 @@ export const CareScheduleScreen: React.FC<Props> = ({ route }) => {
                 </View>
 
                 <View style={styles.taskFooter}>
-                  <View style={[styles.statusBadge, { backgroundColor: task.isOverdue ? '#fee2e2' : '#dcfce7' }]}>
+                  <View style={[styles.statusBadge, { backgroundColor: task.isOverdue ? `${colors.error}22` : task.daysUntilDue <= 2 ? `${colors.warning}22` : `${colors.success}22` }]}>
                     <Typography style={{ fontSize: 12, fontWeight: '600', color: statusColor }}>{statusLabel}</Typography>
                   </View>
                   {task.lastDone && (
@@ -168,7 +170,7 @@ export const CareScheduleScreen: React.FC<Props> = ({ route }) => {
         accessibilityRole="button"
         accessibilityLabel={t('addCareTask')}
       >
-        <Ionicons name="add" size={28} color="#fff" />
+        <Ionicons name="add" size={28} color={colors.neutral.white} />
       </Pressable>
 
       {/* Add Task Modal */}
@@ -203,7 +205,7 @@ export const CareScheduleScreen: React.FC<Props> = ({ route }) => {
                       },
                     ]}
                   >
-                    <Ionicons name={CARE_ICONS[type] as any} size={16} color={selectedType === type ? colors.primary[500] : colors.subtext} />
+                    <Ionicons name={CARE_ICONS[type] as IoniconsName} size={16} color={selectedType === type ? colors.primary[500] : colors.subtext} />
                     <Typography style={{ fontSize: 12, marginLeft: 4, color: selectedType === type ? colors.primary[700] : colors.subtext }}>
                       {typeLabel(type)}
                     </Typography>

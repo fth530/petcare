@@ -58,7 +58,7 @@ export const CompareScreen: React.FC<Props> = () => {
     const [a, b] = selectedPets;
     return [
       { label: t('weight'), valA: `${a.weightKg} kg`, valB: `${b.weightKg} kg` },
-      { label: t('age'), valA: formatAge(a.dateOfBirth, t) ?? '—', valB: formatAge(b.dateOfBirth, t) ?? '—' },
+      { label: t('age'), valA: a.dateOfBirth ? (formatAge(a.dateOfBirth, t) ?? '—') : '—', valB: b.dateOfBirth ? (formatAge(b.dateOfBirth, t) ?? '—') : '—' },
       { label: `${t('food')} (avg 7d)`, valA: `${avg7dFood(a)} g`, valB: `${avg7dFood(b)} g` },
       { label: `${t('water')} (avg 7d)`, valA: `${avg7dWater(a)} srv`, valB: `${avg7dWater(b)} srv` },
       { label: t('totalEvents'), valA: `${a.healthEvents.length}`, valB: `${b.healthEvents.length}` },
@@ -109,7 +109,7 @@ export const CompareScreen: React.FC<Props> = () => {
       {pets.length < 2 && (
         <Card style={[styles.emptyCard, { backgroundColor: colors.card }]}>
           <Typography variant="caption" style={{ color: colors.subtext, textAlign: 'center' }}>
-            Add more pets to compare
+            {t('addMorePetsToCompare')}
           </Typography>
         </Card>
       )}
@@ -155,7 +155,7 @@ export const CompareScreen: React.FC<Props> = () => {
       {selectedPets.length === 1 && (
         <Card style={[styles.emptyCard, { backgroundColor: colors.card }]}>
           <Typography variant="caption" style={{ color: colors.subtext, textAlign: 'center' }}>
-            Select one more pet to see the comparison
+            {t('selectOneMorePet')}
           </Typography>
         </Card>
       )}

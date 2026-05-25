@@ -147,7 +147,7 @@ export const NutritionScreen: React.FC<Props> = ({ route }) => {
       <Card style={[styles.card, { backgroundColor: colors.card }]}>
         <View style={styles.cardHeader}>
           <Ionicons name="pie-chart-outline" size={24} color={colors.warning} />
-          <Typography variant="heading" style={[styles.cardTitle, { color: colors.text }]}>Macronutrients (Recommended)</Typography>
+          <Typography variant="heading" style={[styles.cardTitle, { color: colors.text }]}>{t('macronutrients')}</Typography>
         </View>
         {[
           { label: 'Protein', pct: 25, color: colors.primary[500] },
@@ -171,7 +171,7 @@ export const NutritionScreen: React.FC<Props> = ({ route }) => {
       <Card style={[styles.card, { backgroundColor: colors.card }]}>
         <View style={styles.cardHeader}>
           <Ionicons name="water-outline" size={24} color={colors.primary[500]} />
-          <Typography variant="heading" style={[styles.cardTitle, { color: colors.text }]}>Daily Water Intake</Typography>
+          <Typography variant="heading" style={[styles.cardTitle, { color: colors.text }]}>{t('dailyWaterIntake')}</Typography>
         </View>
         <Typography style={{ fontSize: 24, fontWeight: '700', color: colors.primary[500], textAlign: 'center', marginVertical: 8 }}>
           {waterMin} – {waterMax} ml/day

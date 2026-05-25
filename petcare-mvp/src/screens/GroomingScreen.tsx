@@ -44,7 +44,7 @@ export const GroomingScreen: React.FC<Props> = ({ route }) => {
   };
 
   const handleDelete = (logId: string) => {
-    Alert.alert(t('delete'), 'Remove this grooming entry?', [
+    Alert.alert(t('delete'), t('removeGroomingEntry'), [
       { text: t('cancel'), style: 'cancel' },
       { text: t('delete'), style: 'destructive', onPress: () => deleteGroomingLog(petId, logId) },
     ]);

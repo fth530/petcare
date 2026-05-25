@@ -3,7 +3,11 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { getLocales } from 'expo-localization';
 import { translations, Language, TranslationKey } from './translations';
 
+export type { Language, TranslationKey };
+
 const LANG_KEY = 'petcare-language';
+
+const ALL_LANGS: Language[] = ['en', 'tr', 'de', 'es', 'pt-BR', 'fr', 'ja', 'it'];
 
 interface I18nContextValue {
   language: Language;
@@ -19,8 +23,11 @@ const I18nContext = createContext<I18nContextValue>({
 
 function detectLanguage(): Language {
   try {
-    const locale = getLocales()[0]?.languageCode ?? 'en';
-    return locale === 'tr' ? 'tr' : 'en';
+    const code = getLocales()[0]?.languageCode ?? 'en';
+    const map: Record<string, Language> = {
+      tr: 'tr', de: 'de', es: 'es', fr: 'fr', ja: 'ja', it: 'it', pt: 'pt-BR',
+    };
+    return map[code] ?? 'en';
   } catch {
     return 'en';
   }
@@ -31,7 +38,7 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   React.useEffect(() => {
     AsyncStorage.getItem(LANG_KEY).then((saved) => {
-      if (saved === 'tr' || saved === 'en') setLang(saved);
+      if (saved && ALL_LANGS.includes(saved as Language)) setLang(saved as Language);
     });
   }, []);
 
@@ -41,7 +48,10 @@ export const I18nProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const t = useCallback(
-    (key: TranslationKey): string => translations[language][key] ?? translations.en[key] ?? key,
+    (key: TranslationKey): string =>
+      (translations[language] as Record<TranslationKey, string>)[key] ??
+      translations.en[key] ??
+      key,
     [language]
   );
 

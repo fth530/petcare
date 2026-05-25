@@ -9,7 +9,7 @@ import { Card } from '../components/Card';
 import { Button } from '../components/Button';
 import { styling } from '../theme';
 import { useTheme } from '../context/ThemeContext';
-import { useTranslation } from '../i18n';
+import { useTranslation, Language } from '../i18n';
 import { exportPetsAsJSON } from '../services/ExportService';
 import {
   requestNotificationPermission,
@@ -20,6 +20,17 @@ import {
 } from '../services/NotificationService';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Settings'>;
+
+const LANG_LABELS: Record<Language, string> = {
+  en: '🇬🇧 English',
+  tr: '🇹🇷 Türkçe',
+  de: '🇩🇪 Deutsch',
+  es: '🇪🇸 Español',
+  'pt-BR': '🇧🇷 Português',
+  fr: '🇫🇷 Français',
+  ja: '🇯🇵 日本語',
+  it: '🇮🇹 Italiano',
+};
 
 export const SettingsScreen: React.FC<Props> = () => {
   const pets = usePetStore((s) => s.pets);
@@ -33,7 +44,7 @@ export const SettingsScreen: React.FC<Props> = () => {
   const toggleNotifs = async (val: boolean) => {
     if (val) {
       const granted = await requestNotificationPermission();
-      if (!granted) { Alert.alert('Permission Needed', 'Please enable notifications in your device settings.'); return; }
+      if (!granted) { Alert.alert(t('permissionNeeded'), t('enableNotificationsMsg')); return; }
     }
     setNotifsEnabled(val);
     if (!val) { setFeedingEnabled(false); setVaccineEnabled(false); await cancelAllReminders(); }
@@ -41,13 +52,13 @@ export const SettingsScreen: React.FC<Props> = () => {
 
   const toggleFeeding = async (val: boolean) => {
     setFeedingEnabled(val);
-    if (val) { await scheduleDailyFeedingReminder(8, 0); Alert.alert(t('notifScheduled'), 'Daily feeding reminder set for 8:00 AM'); }
+    if (val) { await scheduleDailyFeedingReminder(8, 0); Alert.alert(t('notifScheduled'), t('feedingReminderSetMsg')); }
     else await cancelAllReminders();
   };
 
   const toggleVaccine = async (val: boolean) => {
     setVaccineEnabled(val);
-    if (val) { await scheduleVaccineReminders(pets); Alert.alert(t('notifScheduled'), 'Vaccine reminders scheduled!'); }
+    if (val) { await scheduleVaccineReminders(pets); Alert.alert(t('notifScheduled'), t('vaccineRemindersMsg')); }
   };
 
   const toggleBirthday = async (val: boolean) => {
@@ -59,7 +70,7 @@ export const SettingsScreen: React.FC<Props> = () => {
     try {
       await exportPetsAsJSON(pets);
     } catch {
-      Alert.alert('Error', 'Could not export data. Please try again.');
+      Alert.alert(t('errorTitle'), t('exportError'));
     }
   };
 
@@ -94,12 +105,12 @@ export const SettingsScreen: React.FC<Props> = () => {
       <Typography variant="caption" style={[styles.sectionLabel, { color: colors.subtext }]}>{t('language').toUpperCase()}</Typography>
       <Card style={[styles.card, { backgroundColor: colors.card }]}>
         <View style={styles.langRow}>
-          {(['en', 'tr'] as const).map((lang) => (
+          {(Object.entries(LANG_LABELS) as [typeof language, string][]).map(([lang, label]) => (
             <Pressable key={lang} onPress={() => setLanguage(lang)}
               style={[styles.langBtn, { borderColor: language === lang ? colors.primary[500] : colors.border, backgroundColor: language === lang ? colors.primary[100] : colors.background }]}
               accessibilityRole="button">
-              <Typography style={{ color: language === lang ? colors.primary[700] : colors.subtext, fontWeight: language === lang ? '600' : '400' }}>
-                {lang === 'en' ? '🇬🇧 English' : '🇹🇷 Türkçe'}
+              <Typography style={{ color: language === lang ? colors.primary[700] : colors.subtext, fontWeight: language === lang ? '600' : '400', fontSize: 13 }}>
+                {label}
               </Typography>
             </Pressable>
           ))}
@@ -150,7 +161,7 @@ const styles = StyleSheet.create({
   card: { marginBottom: 24, padding: 0, overflow: 'hidden' },
   row: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 16, borderBottomWidth: 1 },
   rowLeft: { flexDirection: 'row', alignItems: 'center' },
-  langRow: { flexDirection: 'row', padding: 12, gap: 8 },
-  langBtn: { flex: 1, paddingVertical: 10, borderRadius: styling.borderRadius, borderWidth: 1, alignItems: 'center' },
+  langRow: { flexDirection: 'row', flexWrap: 'wrap', padding: 10, gap: 8 },
+  langBtn: { width: '47%', paddingVertical: 10, borderRadius: styling.borderRadius, borderWidth: 1, alignItems: 'center' },
   dataBtn: { marginHorizontal: 16, marginVertical: 8 },
 });

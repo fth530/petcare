@@ -30,7 +30,7 @@ export const PetPassportScreen: React.FC<Props> = ({ route }) => {
     try {
       await exportPetPassportAsPDF(pet);
     } catch {
-      Alert.alert('Error', 'Could not export PDF. Please try again.');
+      Alert.alert(t('errorTitle'), t('pdfExportError'));
     } finally {
       setExporting(false);
     }
@@ -88,8 +88,8 @@ export const PetPassportScreen: React.FC<Props> = ({ route }) => {
       {/* Basic info */}
       <Card style={[styles.card, { backgroundColor: colors.card }]}>
         <Section title={t('age')} icon="information-circle-outline">
-          <InfoRow label={t('dateOfBirth')} value={format(parseISO(pet.dateOfBirth), 'dd MMM yyyy')} />
-          <InfoRow label={t('age')} value={formatAge(pet.dateOfBirth, t)} />
+          <InfoRow label={t('dateOfBirth')} value={pet.dateOfBirth ? format(parseISO(pet.dateOfBirth), 'dd MMM yyyy') : '—'} />
+          <InfoRow label={t('age')} value={pet.dateOfBirth ? (formatAge(pet.dateOfBirth, t) ?? '—') : '—'} />
           <InfoRow label={t('gender')} value={pet.gender === 'male' ? t('male') : t('female')} />
           <InfoRow label={t('weightLabel')} value={`${pet.weightKg} kg`} />
         </Section>
@@ -149,7 +149,7 @@ export const PetPassportScreen: React.FC<Props> = ({ route }) => {
 
       {/* Export button */}
       <Button
-        title={exporting ? 'Generating PDF...' : t('exportPassport')}
+        title={exporting ? t('generatingPdf') : t('exportPassport')}
         onPress={handleExportPDF}
         style={styles.exportBtn}
         accessibilityLabel={t('exportPassport')}

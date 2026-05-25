@@ -67,17 +67,17 @@ export const PhotoAlbumScreen: React.FC<Props> = ({ route }) => {
       if (isAvailable) {
         await Sharing.shareAsync(uri);
       } else {
-        Alert.alert('Sharing not available', 'Sharing is not supported on this device.');
+        Alert.alert(t('sharingNotAvailable'), t('sharingNotSupportedMsg'));
       }
     } catch {
-      Alert.alert('Error', 'Could not share this photo.');
+      Alert.alert(t('errorTitle'), t('photoShareError'));
     }
-  }, []);
+  }, [t]);
 
   const handlePhotoPress = useCallback((photoId: string, uri: string) => {
-    Alert.alert('Photo Options', 'What would you like to do?', [
-      { text: 'View Full', onPress: () => { setSelectedPhoto(uri); setSelectedPhotoId(photoId); } },
-      { text: 'Share', onPress: () => handleShare(uri) },
+    Alert.alert(t('photoOptions'), t('photoOptionsMsg'), [
+      { text: t('viewFull'), onPress: () => { setSelectedPhoto(uri); setSelectedPhotoId(photoId); } },
+      { text: t('shareProfile'), onPress: () => handleShare(uri) },
       { text: t('cancel'), style: 'cancel' },
     ]);
   }, [handleShare, t]);
@@ -136,7 +136,7 @@ export const PhotoAlbumScreen: React.FC<Props> = ({ route }) => {
       )}
 
       <Typography variant="caption" style={{ color: colors.neutral[300], textAlign: 'center', marginTop: 8 }}>
-        Long press to delete
+        {t('longPressToDelete')}
       </Typography>
 
       {/* Full screen viewer */}

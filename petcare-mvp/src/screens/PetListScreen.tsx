@@ -174,7 +174,7 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
         showsVerticalScrollIndicator={false}
         ListEmptyComponent={
           <View style={styles.noResults}>
-            <Typography variant="caption" style={{ color: colors.subtext, textAlign: 'center' }}>No pets match your search.</Typography>
+            <Typography variant="caption" style={{ color: colors.subtext, textAlign: 'center' }}>{t('noPetsMatchSearch')}</Typography>
           </View>
         }
       />
