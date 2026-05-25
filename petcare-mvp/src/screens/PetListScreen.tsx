@@ -1,7 +1,6 @@
-import React, { useCallback, useMemo, useState } from 'react';
-import { View, StyleSheet, FlatList, Pressable, ListRenderItem, TextInput } from 'react-native';
+import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
+import { View, StyleSheet, FlatList, Pressable, ListRenderItem, TextInput, Animated } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
-import Animated, { FadeIn } from 'react-native-reanimated';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -18,6 +17,14 @@ import { formatAge } from '../utils/dateUtils';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'PetList'>;
 type Filter = 'all' | 'dog' | 'cat' | 'other';
+
+const FadeInView: React.FC<{ delay: number; children: React.ReactNode }> = ({ delay, children }) => {
+  const opacity = useRef(new Animated.Value(0)).current;
+  useEffect(() => {
+    Animated.timing(opacity, { toValue: 1, duration: 350, delay, useNativeDriver: true }).start();
+  }, []);
+  return <Animated.View style={{ opacity }}>{children}</Animated.View>;
+};
 
 export const PetListScreen: React.FC<Props> = ({ navigation }) => {
   const pets = usePetStore(state => state.pets);
@@ -68,7 +75,7 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
   }, [pets, filter, search]);
 
   const renderItem: ListRenderItem<Pet> = useCallback(({ item, index }) => (
-    <Animated.View entering={FadeIn.delay(index * 80).duration(350)}>
+    <FadeInView delay={index * 80}>
       <Pressable
         onPress={() => {
           Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -92,7 +99,7 @@ export const PetListScreen: React.FC<Props> = ({ navigation }) => {
           <Ionicons name="chevron-forward" size={24} color={colors.neutral[300]} />
         </Card>
       </Pressable>
-    </Animated.View>
+    </FadeInView>
   ), [navigation, colors, t]);
 
   const filters: { key: Filter; label: string }[] = [

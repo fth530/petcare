@@ -1,14 +1,13 @@
-import React from 'react';
-import { Text, StyleSheet, Pressable, PressableProps, ViewStyle, TextStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withSpring } from 'react-native-reanimated';
+import React, { useRef } from 'react';
+import { Text, StyleSheet, Pressable, PressableProps, ViewStyle, TextStyle, GestureResponderEvent, StyleProp, Animated } from 'react-native';
 import { colors, styling } from '../theme';
 import * as Haptics from 'expo-haptics';
 
 interface ButtonProps extends PressableProps {
   title: string;
   variant?: 'primary' | 'secondary' | 'danger';
-  style?: ViewStyle;
-  textStyle?: TextStyle;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
   icon?: React.ReactNode;
 }
 
@@ -24,23 +23,17 @@ export const Button: React.FC<ButtonProps> = ({
   disabled,
   ...props
 }) => {
-  const scale = useSharedValue(1);
-
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      transform: [{ scale: scale.value }],
-    };
-  });
+  const scale = useRef(new Animated.Value(1)).current;
 
   const handlePressIn = () => {
-    scale.value = withSpring(0.95);
+    Animated.spring(scale, { toValue: 0.95, useNativeDriver: true }).start();
   };
 
   const handlePressOut = () => {
-    scale.value = withSpring(1);
+    Animated.spring(scale, { toValue: 1, useNativeDriver: true }).start();
   };
 
-  const handlePress = (e: any) => {
+  const handlePress = (e: GestureResponderEvent) => {
     Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
     if (onPress) onPress(e);
   };
@@ -75,8 +68,8 @@ export const Button: React.FC<ButtonProps> = ({
       style={[
         styles.button,
         { backgroundColor: getBackgroundColor() },
-        animatedStyle,
-        style
+        { transform: [{ scale }] },
+        style,
       ]}
       {...props}
     >

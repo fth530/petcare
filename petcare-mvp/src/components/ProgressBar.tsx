@@ -1,33 +1,34 @@
-import React, { useEffect } from 'react';
-import { View, StyleSheet, ViewStyle } from 'react-native';
-import Animated, { useAnimatedStyle, useSharedValue, withTiming, Easing } from 'react-native-reanimated';
-import { colors, styling } from '../theme';
+import React, { useEffect, useRef } from 'react';
+import { View, Animated, Easing, StyleSheet, ViewStyle } from 'react-native';
+import { colors } from '../theme';
 
 interface ProgressBarProps {
-  progress: number; // 0 to 1
+  progress: number;
   style?: ViewStyle;
   color?: string;
 }
 
 export const ProgressBar: React.FC<ProgressBarProps> = React.memo(({ progress, style, color }) => {
-  const animatedProgress = useSharedValue(0);
+  const animatedProgress = useRef(new Animated.Value(0)).current;
 
   useEffect(() => {
-    animatedProgress.value = withTiming(progress, {
+    Animated.timing(animatedProgress, {
+      toValue: progress,
       duration: 1000,
       easing: Easing.out(Easing.exp),
-    });
+      useNativeDriver: false,
+    }).start();
   }, [progress]);
 
-  const animatedStyle = useAnimatedStyle(() => {
-    return {
-      width: `${animatedProgress.value * 100}%`,
-    };
+  const animatedWidth = animatedProgress.interpolate({
+    inputRange: [0, 1],
+    outputRange: ['0%', '100%'],
+    extrapolate: 'clamp',
   });
 
   return (
     <View style={[styles.container, style]}>
-      <Animated.View style={[styles.fill, animatedStyle, color ? { backgroundColor: color } : null]} />
+      <Animated.View style={[styles.fill, { width: animatedWidth }, color ? { backgroundColor: color } : null]} />
     </View>
   );
 });

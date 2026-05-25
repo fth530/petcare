@@ -8,15 +8,10 @@ import {
   TouchableOpacity,
   ViewToken,
   ListRenderItemInfo,
+  Animated,
 } from 'react-native';
 import { StatusBar } from 'expo-status-bar';
 import { LinearGradient } from 'expo-linear-gradient';
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  withSpring,
-  withTiming,
-} from 'react-native-reanimated';
 import { MaterialCommunityIcons } from '@expo/vector-icons';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
@@ -81,20 +76,17 @@ interface DotProps {
 }
 
 const Dot = React.memo<DotProps>(({ isActive }) => {
-  const dotWidth = useSharedValue(isActive ? 24 : 8);
-  const dotOpacity = useSharedValue(isActive ? 1 : 0.5);
+  const dotWidth = useRef(new Animated.Value(isActive ? 24 : 8)).current;
+  const dotOpacity = useRef(new Animated.Value(isActive ? 1 : 0.5)).current;
 
   useEffect(() => {
-    dotWidth.value = withSpring(isActive ? 24 : 8, { damping: 15, stiffness: 200 });
-    dotOpacity.value = withTiming(isActive ? 1 : 0.5, { duration: 250 });
+    Animated.parallel([
+      Animated.spring(dotWidth, { toValue: isActive ? 24 : 8, friction: 7, tension: 40, useNativeDriver: false }),
+      Animated.timing(dotOpacity, { toValue: isActive ? 1 : 0.5, duration: 250, useNativeDriver: false }),
+    ]).start();
   }, [isActive]);
 
-  const animStyle = useAnimatedStyle(() => ({
-    width: dotWidth.value,
-    opacity: dotOpacity.value,
-  }));
-
-  return <Animated.View style={[styles.dot, animStyle]} />;
+  return <Animated.View style={[styles.dot, { width: dotWidth, opacity: dotOpacity }]} />;
 });
 Dot.displayName = 'Dot';
 
