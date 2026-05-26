@@ -4,6 +4,7 @@ import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
+import { useOnboardingStore } from '../store/onboardingStore';
 import { Typography } from '../components/Typography';
 import { Card } from '../components/Card';
 import { Button } from '../components/Button';
@@ -36,6 +37,7 @@ export const SettingsScreen: React.FC<Props> = () => {
   const pets = usePetStore((s) => s.pets);
   const { colors, isDark, toggleTheme } = useTheme();
   const { t, language, setLanguage } = useTranslation();
+  const resetOnboarding = useOnboardingStore((s) => s.resetOnboarding);
   const [notifsEnabled, setNotifsEnabled] = useState(false);
   const [feedingEnabled, setFeedingEnabled] = useState(false);
   const [vaccineEnabled, setVaccineEnabled] = useState(false);
@@ -78,6 +80,18 @@ export const SettingsScreen: React.FC<Props> = () => {
     Alert.alert(t('clearData'), t('clearDataConfirm'), [
       { text: t('cancel'), style: 'cancel' },
       { text: t('delete'), style: 'destructive', onPress: () => usePetStore.setState({ pets: [] }) },
+    ]);
+  };
+
+  const handleResetApp = () => {
+    Alert.alert(t('resetApp'), t('resetAppConfirm'), [
+      { text: t('cancel'), style: 'cancel' },
+      {
+        text: t('delete'), style: 'destructive', onPress: () => {
+          usePetStore.setState({ pets: [] });
+          resetOnboarding();
+        },
+      },
     ]);
   };
 
@@ -144,6 +158,8 @@ export const SettingsScreen: React.FC<Props> = () => {
         <Button title={t('exportData')} variant="secondary" onPress={handleExport} style={styles.dataBtn} accessibilityLabel={t('exportData')} />
         <View style={{ height: 12 }} />
         <Button title={t('clearData')} variant="danger" onPress={handleClearData} style={styles.dataBtn} accessibilityLabel={t('clearData')} />
+        <View style={{ height: 12 }} />
+        <Button title={t('resetApp')} variant="danger" onPress={handleResetApp} style={styles.dataBtn} accessibilityLabel={t('resetApp')} />
       </Card>
 
       {/* App info */}

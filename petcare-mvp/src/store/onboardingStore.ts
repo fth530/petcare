@@ -6,6 +6,7 @@ interface OnboardingStore {
   hasCompletedOnboarding: boolean;
   hasHydrated: boolean;
   completeOnboarding: () => void;
+  resetOnboarding: () => void;
   setHasHydrated: (value: boolean) => void;
 }
 
@@ -15,6 +16,7 @@ export const useOnboardingStore = create<OnboardingStore>()(
       hasCompletedOnboarding: false,
       hasHydrated: false,
       completeOnboarding: () => set({ hasCompletedOnboarding: true }),
+      resetOnboarding: () => set({ hasCompletedOnboarding: false }),
       setHasHydrated: (value) => set({ hasHydrated: value }),
     }),
     {
