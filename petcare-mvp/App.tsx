@@ -1,5 +1,4 @@
 import React, { useEffect } from 'react';
-import { View } from 'react-native';
 import { RootNavigator } from './src/navigation/RootNavigator';
 import { usePetStore } from './src/store/petStore';
 import { useOnboardingStore } from './src/store/onboardingStore';
@@ -13,7 +12,7 @@ import { I18nProvider } from './src/i18n';
 function AppInner() {
   const petHasHydrated = usePetStore((state) => state.hasHydrated);
   const loadMockDataIfEmpty = usePetStore((state) => state.loadMockDataIfEmpty);
-  const { isDark, colors } = useTheme();
+  const { isDark } = useTheme();
   const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompletedOnboarding);
 
   useEffect(() => {
@@ -32,11 +31,7 @@ function AppInner() {
   return (
     <SafeAreaProvider>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      {petHasHydrated ? (
-        <RootNavigator />
-      ) : (
-        <View style={{ flex: 1, backgroundColor: colors.background }} />
-      )}
+      <RootNavigator />
     </SafeAreaProvider>
   );
 }
