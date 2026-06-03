@@ -12,7 +12,6 @@ import { I18nProvider } from './src/i18n';
 
 function AppInner() {
   const petHasHydrated = usePetStore((state) => state.hasHydrated);
-  const onboardingHasHydrated = useOnboardingStore((state) => state.hasHydrated);
   const loadMockDataIfEmpty = usePetStore((state) => state.loadMockDataIfEmpty);
   const { isDark, colors } = useTheme();
   const hasCompletedOnboarding = useOnboardingStore((s) => s.hasCompletedOnboarding);
@@ -20,8 +19,6 @@ function AppInner() {
   useEffect(() => {
     if (petHasHydrated) loadMockDataIfEmpty();
   }, [petHasHydrated, loadMockDataIfEmpty]);
-
-  const isReady = petHasHydrated && onboardingHasHydrated;
 
   if (!hasCompletedOnboarding) {
     return (
@@ -35,7 +32,7 @@ function AppInner() {
   return (
     <SafeAreaProvider>
       <StatusBar style={isDark ? 'light' : 'dark'} />
-      {isReady ? (
+      {petHasHydrated ? (
         <RootNavigator />
       ) : (
         <View style={{ flex: 1, backgroundColor: colors.background }} />
