@@ -1,22 +1,28 @@
 import React, { useState } from 'react';
 import { View, TextInput as RNTextInput, TextInputProps as RNTextInputProps, StyleSheet, Text } from 'react-native';
-import { colors, styling, typography } from '../theme';
+import { styling } from '../theme';
+import { useTheme } from '../context/ThemeContext';
 
 interface TextInputProps extends RNTextInputProps {
   label: string;
 }
 
-export const TextInput: React.FC<TextInputProps> = ({ label, style, ...props }) => {
+export const TextInput: React.FC<TextInputProps> = React.memo(({ label, style, ...props }) => {
   const [isFocused, setIsFocused] = useState(false);
+  const { colors } = useTheme();
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>{label}</Text>
+      <Text style={[styles.label, { color: colors.subtext }]}>{label}</Text>
       <RNTextInput
         style={[
           styles.input,
-          isFocused && styles.inputFocused,
-          style
+          {
+            borderColor: isFocused ? colors.primary[500] : colors.border,
+            color: colors.text,
+            backgroundColor: colors.card,
+          },
+          style,
         ]}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
@@ -25,26 +31,23 @@ export const TextInput: React.FC<TextInputProps> = ({ label, style, ...props }) 
       />
     </View>
   );
-};
+});
+
+TextInput.displayName = 'TextInput';
 
 const styles = StyleSheet.create({
   container: {
     marginBottom: styling.spacing[16],
   },
   label: {
-    ...typography.caption,
-    marginBottom: styling.spacing[8],
+    fontSize: 13,
     fontWeight: '500',
+    marginBottom: styling.spacing[8],
   },
   input: {
-    ...typography.body,
+    fontSize: 16,
     borderWidth: 1,
-    borderColor: colors.neutral[200],
     borderRadius: styling.borderRadius,
     padding: styling.spacing[16],
-    backgroundColor: colors.neutral.white,
-  },
-  inputFocused: {
-    borderColor: colors.primary[500],
   },
 });

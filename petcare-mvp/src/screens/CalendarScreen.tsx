@@ -65,8 +65,8 @@ export const CalendarScreen: React.FC<Props> = ({ route, navigation }) => {
     if (!pet) return;
     const success = await addHealthEventToCalendar(pet.name, event);
     Alert.alert(
-      success ? 'Added!' : t('permissionNeeded'),
-      success ? `"${event.title}" added to your calendar.` : 'Please allow calendar access in settings.'
+      success ? t('addedToCalendar') : t('permissionNeeded'),
+      success ? `"${event.title}" ${t('eventAddedMsg')}` : t('calendarPermissionMsg')
     );
   };
 
@@ -76,13 +76,13 @@ export const CalendarScreen: React.FC<Props> = ({ route, navigation }) => {
     <ScrollView style={[styles.container, { backgroundColor: colors.background }]} contentContainerStyle={styles.content}>
       {/* Month navigation */}
       <View style={styles.monthNav}>
-        <Pressable onPress={() => setCurrentMonth(subMonths(currentMonth, 1))} style={styles.navBtn} accessibilityRole="button">
+        <Pressable onPress={() => setCurrentMonth(subMonths(currentMonth, 1))} style={styles.navBtn} accessibilityRole="button" accessibilityLabel="Previous month">
           <Ionicons name="chevron-back" size={22} color={colors.primary[500]} />
         </Pressable>
         <Typography style={{ fontSize: 18, fontWeight: '700', color: colors.text }}>
           {format(currentMonth, 'MMMM yyyy')}
         </Typography>
-        <Pressable onPress={() => setCurrentMonth(addMonths(currentMonth, 1))} style={styles.navBtn} accessibilityRole="button">
+        <Pressable onPress={() => setCurrentMonth(addMonths(currentMonth, 1))} style={styles.navBtn} accessibilityRole="button" accessibilityLabel="Next month">
           <Ionicons name="chevron-forward" size={22} color={colors.primary[500]} />
         </Pressable>
       </View>

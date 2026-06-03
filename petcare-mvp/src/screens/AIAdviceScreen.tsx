@@ -74,8 +74,8 @@ function generateAdvice(pet: Pet): AdviceItem[] {
 
   // Vaccine reminders
   const upcomingVaccine = pet.healthEvents
-    .filter((e) => e.type === 'vaccine' && e.nextDueDate)
-    .map((e) => ({ ...e, daysUntil: differenceInDays(parseISO(e.nextDueDate!), now) }))
+    .filter((e): e is typeof e & { nextDueDate: string } => e.type === 'vaccine' && !!e.nextDueDate)
+    .map((e) => ({ ...e, daysUntil: differenceInDays(parseISO(e.nextDueDate), now) }))
     .filter((e) => e.daysUntil >= 0 && e.daysUntil <= 30)
     .sort((a, b) => a.daysUntil - b.daysUntil)[0];
 

@@ -64,7 +64,7 @@ export async function exportPetPassportAsPDF(pet: Pet): Promise<void> {
   <div class="section">
     <div class="section-title">Basic Information</div>
     <div class="info-grid">
-      <div class="info-item"><div class="info-label">Date of Birth</div><div class="info-value">${formatDate(pet.dateOfBirth)}</div></div>
+      <div class="info-item"><div class="info-label">Date of Birth</div><div class="info-value">${pet.dateOfBirth ? formatDate(pet.dateOfBirth) : '—'}</div></div>
       <div class="info-item"><div class="info-label">Weight</div><div class="info-value">${pet.weightKg} kg</div></div>
       <div class="info-item"><div class="info-label">Food Target</div><div class="info-value">${pet.foodTargetGrams} g/day</div></div>
       <div class="info-item"><div class="info-label">Water Target</div><div class="info-value">${pet.waterTargetServings} srv/day</div></div>

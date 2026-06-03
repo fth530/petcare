@@ -1,7 +1,9 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, ComponentProps } from 'react';
 import { View, StyleSheet, ScrollView, Pressable, Alert, Modal } from 'react-native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { Ionicons } from '@expo/vector-icons';
+
+type IoniconsName = ComponentProps<typeof Ionicons>['name'];
 import { format, parseISO, subDays } from 'date-fns';
 import { RootStackParamList } from '../navigation/RootNavigator';
 import { usePetStore } from '../store/petStore';
@@ -62,7 +64,7 @@ export const ActivityLogScreen: React.FC<Props> = ({ route }) => {
 
   const handleAdd = () => {
     const dur = parseInt(durationStr, 10);
-    if (isNaN(dur) || dur <= 0) { Alert.alert(t('invalidWeight'), 'Duration must be a positive number.'); return; }
+    if (isNaN(dur) || dur <= 0) { Alert.alert(t('invalidDuration'), t('durationPositiveMsg')); return; }
     const dist = distanceStr ? parseFloat(distanceStr) : undefined;
     addActivityLog(petId, {
       date: new Date().toISOString(),
@@ -114,7 +116,7 @@ export const ActivityLogScreen: React.FC<Props> = ({ route }) => {
           {sortedLogs.map((log, i) => (
             <View key={log.id} style={[styles.logRow, { borderBottomColor: colors.border, borderBottomWidth: i < sortedLogs.length - 1 ? 1 : 0 }]}>
               <View style={[styles.iconCircle, { backgroundColor: ACT_COLORS[log.type] + '22' }]}>
-                <Ionicons name={ACT_ICONS[log.type] as any} size={20} color={ACT_COLORS[log.type]} />
+                <Ionicons name={ACT_ICONS[log.type] as IoniconsName} size={20} color={ACT_COLORS[log.type]} />
               </View>
               <View style={{ flex: 1 }}>
                 <Typography style={{ fontWeight: '600', color: colors.text }}>{typeLabel[log.type]}</Typography>
@@ -143,7 +145,7 @@ export const ActivityLogScreen: React.FC<Props> = ({ route }) => {
               {actTypes.map((a) => (
                 <Pressable key={a} onPress={() => setActType(a)}
                   style={[styles.typeChip, { borderColor: actType === a ? ACT_COLORS[a] : colors.border, backgroundColor: actType === a ? ACT_COLORS[a] + '22' : colors.background }]}
-                  accessibilityRole="button">
+                  accessibilityRole="button" accessibilityLabel={typeLabel[a]}>
                   <Ionicons name={ACT_ICONS[a] as any} size={18} color={actType === a ? ACT_COLORS[a] : colors.subtext} />
                   <Typography style={{ fontSize: 11, color: actType === a ? ACT_COLORS[a] : colors.subtext, marginTop: 4 }}>{typeLabel[a]}</Typography>
                 </Pressable>

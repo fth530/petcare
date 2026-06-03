@@ -33,6 +33,62 @@ jest.mock('@expo/vector-icons', () => {
   };
 });
 
+jest.mock('expo-notifications', () => ({
+  setNotificationHandler: jest.fn(),
+  getPermissionsAsync: jest.fn().mockResolvedValue({ granted: true, status: 'granted' }),
+  requestPermissionsAsync: jest.fn().mockResolvedValue({ granted: true, status: 'granted' }),
+  scheduleNotificationAsync: jest.fn().mockResolvedValue('mock-notification-id'),
+  cancelAllScheduledNotificationsAsync: jest.fn().mockResolvedValue(undefined),
+  cancelScheduledNotificationAsync: jest.fn().mockResolvedValue(undefined),
+  SchedulableTriggerInputTypes: { DATE: 'date', DAILY: 'daily' },
+}));
+
+jest.mock('expo-file-system/legacy', () => ({
+  documentDirectory: 'file:///mock-document-directory/',
+  writeAsStringAsync: jest.fn().mockResolvedValue(undefined),
+  EncodingType: { UTF8: 'utf8' },
+}));
+
+jest.mock('expo-sharing', () => ({
+  isAvailableAsync: jest.fn().mockResolvedValue(true),
+  shareAsync: jest.fn().mockResolvedValue(undefined),
+}));
+
+jest.mock('expo-calendar', () => ({
+  requestCalendarPermissionsAsync: jest.fn().mockResolvedValue({ status: 'granted' }),
+  getDefaultCalendarAsync: jest.fn().mockResolvedValue({ id: 'mock-calendar-id' }),
+  createEventAsync: jest.fn().mockResolvedValue('mock-event-id'),
+}));
+
+jest.mock('expo-print', () => ({
+  printToFileAsync: jest.fn().mockResolvedValue({ uri: 'file:///mock.pdf' }),
+}));
+
+jest.mock('./src/i18n', () => {
+  const { translations } = require('./src/i18n/translations');
+  return {
+    useTranslation: () => ({
+      t: (key) => translations.en[key] ?? key,
+      language: 'en',
+      setLanguage: jest.fn(),
+    }),
+    I18nProvider: ({ children }) => children,
+  };
+});
+
+jest.mock('./src/context/ThemeContext', () => {
+  const { lightColors, styling } = require('./src/theme');
+  return {
+    useTheme: () => ({
+      colors: lightColors,
+      isDark: false,
+      toggleTheme: jest.fn(),
+      styling,
+    }),
+    ThemeProvider: ({ children }) => children,
+  };
+});
+
 jest.mock('react-native-reanimated', () => {
   const View = require('react-native').View;
   const Image = require('react-native').Image;

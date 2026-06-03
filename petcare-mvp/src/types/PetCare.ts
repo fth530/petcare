@@ -103,7 +103,7 @@ export interface Pet {
   name: string;
   type: 'dog' | 'cat' | 'other';
   breed: string;
-  dateOfBirth: string;
+  dateOfBirth?: string;
   gender: 'male' | 'female';
   weightKg: number;
   avatarUri?: string;

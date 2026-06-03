@@ -74,8 +74,8 @@ export const BudgetScreen: React.FC<Props> = ({ route }) => {
 
   const handleAdd = () => {
     const amount = parseFloat(amountStr);
-    if (isNaN(amount) || amount <= 0) { Alert.alert('Invalid Amount', 'Please enter a valid amount.'); return; }
-    if (!description.trim()) { Alert.alert('Description Required', 'Please add a description.'); return; }
+    if (isNaN(amount) || amount <= 0) { Alert.alert(t('invalidAmount'), t('invalidAmountMsg')); return; }
+    if (!description.trim()) { Alert.alert(t('descriptionRequired'), t('descriptionRequiredMsg')); return; }
     addExpense(petId, {
       date: new Date().toISOString(),
       category, amount,

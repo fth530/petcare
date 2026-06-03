@@ -1,25 +1,42 @@
-import * as Notifications from 'expo-notifications';
+import Constants from 'expo-constants';
 import { Pet } from '../types/PetCare';
 import { parseISO, isFuture, subDays } from 'date-fns';
 
-// Local notification handler — safe in Expo Go
-try {
-  Notifications.setNotificationHandler({
-    handleNotification: async () => ({
-      shouldShowAlert: true,
-      shouldPlaySound: true,
-      shouldSetBadge: false,
-      shouldShowBanner: true,
-      shouldShowList: true,
-    }),
-  });
-} catch {}
+// expo-notifications push token support was removed from Expo Go in SDK 53.
+// We load the module lazily so Expo Go never triggers the push registration.
+const isExpoGo = Constants.appOwnership === 'expo';
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+let N: any = null;
+
+function getNotifications() {
+  if (isExpoGo) return null;
+  if (!N) {
+    try {
+      N = require('expo-notifications');
+      N.setNotificationHandler({
+        handleNotification: async () => ({
+          shouldShowAlert: true,
+          shouldPlaySound: true,
+          shouldSetBadge: false,
+          shouldShowBanner: true,
+          shouldShowList: true,
+        }),
+      });
+    } catch {
+      N = null;
+    }
+  }
+  return N;
+}
 
 export async function requestNotificationPermission(): Promise<boolean> {
+  const Notifications = getNotifications();
+  if (!Notifications) return false;
   try {
-    const existing = (await Notifications.getPermissionsAsync()) as unknown as { granted: boolean; status: string };
+    const existing = (await Notifications.getPermissionsAsync()) as { granted: boolean; status: string };
     if (existing.granted || existing.status === 'granted') return true;
-    const newPerm = (await Notifications.requestPermissionsAsync()) as unknown as { granted: boolean; status: string };
+    const newPerm = (await Notifications.requestPermissionsAsync()) as { granted: boolean; status: string };
     return newPerm.granted || newPerm.status === 'granted';
   } catch {
     return false;
@@ -27,6 +44,8 @@ export async function requestNotificationPermission(): Promise<boolean> {
 }
 
 export async function scheduleVaccineReminders(pets: Pet[]): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
     for (const pet of pets) {
@@ -51,6 +70,8 @@ export async function scheduleVaccineReminders(pets: Pet[]): Promise<void> {
 }
 
 export async function scheduleDailyFeedingReminder(hour: number, minute: number): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   try {
     const id = 'daily-feeding';
     await Notifications.cancelScheduledNotificationAsync(id).catch(() => {});
@@ -60,22 +81,22 @@ export async function scheduleDailyFeedingReminder(hour: number, minute: number)
         title: '🍖 Time to feed your pets!',
         body: "Don't forget to log today's meal.",
       },
-      trigger: {
-        type: Notifications.SchedulableTriggerInputTypes.DAILY,
-        hour,
-        minute,
-      },
+      trigger: { type: Notifications.SchedulableTriggerInputTypes.DAILY, hour, minute },
     });
   } catch {}
 }
 
 export async function cancelAllReminders(): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   try {
     await Notifications.cancelAllScheduledNotificationsAsync();
   } catch {}
 }
 
 export async function scheduleBirthdayReminders(pets: Pet[]): Promise<void> {
+  const Notifications = getNotifications();
+  if (!Notifications) return;
   try {
     for (const pet of pets) {
       if (!pet.dateOfBirth) continue;
